@@ -1,4 +1,4 @@
-// Owner: Teammate 4 (backend + timing)
+// Owner: Andrew (backend, timing, reliability)
 // Photos are held in memory for one request only. Nothing is written to disk or a database.
 import express from "express";
 import multer from "multer";
@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { analyzeMoodboard, planShots, MOCK } from "./lib/gemini.js";
 import { rankLocations } from "./lib/match.js";
 import { planTiming } from "./lib/timing.js";
+import { guarded, LIMITS, fallbackProfile, fallbackShots } from "./lib/reliability.js";
 
 const app = express();
 const upload = multer({
@@ -38,8 +39,10 @@ app.post("/api/plan", upload.array("photos", 3), async (req, res, next) => {
     const date = validDate(req.body.date);
     if (!req.files?.length && !MOCK) return res.status(400).json({ error: "Upload 1 to 3 photos." });
 
-    const profile = await analyzeMoodboard(req.files ?? []);
-    res.json({ date, mock: MOCK, profile, matches: await topMatches(profile, date) });
+    const { value, error } = await guarded("moodboard analysis", () => analyzeMoodboard(req.files ?? []), LIMITS.analyze);
+    const profile = error ? fallbackProfile() : value;
+    const notice = error ? "The AI couldn't read the photos just now, so pick the style tags yourself below." : null;
+    res.json({ date, mock: MOCK, profile, matches: await topMatches(profile, date), notice });
   } catch (err) {
     next(err);
   }
@@ -64,7 +67,11 @@ app.post("/api/shotlist", async (req, res, next) => {
   try {
     const { profile, location } = req.body ?? {};
     if (!profile || !location?.name) return res.status(400).json({ error: "Missing profile or location." });
-    res.json(await planShots(profile, location, location.timing ?? { window: "late afternoon", sunset: "sunset" }));
+    const timing = location.timing ?? { window: "late afternoon", sunset: "sunset" };
+    const { value, error } = await guarded("shot list", () => planShots(profile, location, timing), LIMITS.shots);
+    // An empty or malformed list is as bad as no list.
+    if (!error && Array.isArray(value?.shots) && value.shots.length >= 3) return res.json(value);
+    res.json({ ...fallbackShots(location, timing), notice: "The AI shot writer didn't respond, so here's a basic shot list to start from." });
   } catch (err) {
     next(err);
   }

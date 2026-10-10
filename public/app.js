@@ -1,6 +1,7 @@
 // Owner: Teammate 1 (frontend)
 import { esc, prettyDate, mapLink, unverified, proposalHTML } from "/proposal.js";
 import { shareLink } from "/share.js";
+import { shrinkPhoto } from "/shrink.js";
 
 const $ = (sel) => document.querySelector(sel);
 const state = { files: [], plan: null, location: null, shots: null };
@@ -22,6 +23,12 @@ document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click"
 function setError(msg) {
   $("#error").hidden = !msg;
   $("#error").textContent = msg || "";
+}
+
+// Shown when the server fell back because Gemini was slow or down.
+function setNotice(el, msg) {
+  el.hidden = !msg;
+  el.textContent = msg || "";
 }
 
 async function api(path, options) {
@@ -77,10 +84,11 @@ $("#planForm").addEventListener("submit", async (e) => {
   const done = busy($("#planBtn"), "Reading the moodboard…");
   try {
     const form = new FormData();
-    state.files.forEach((f) => form.append("photos", f));
+    for (const f of await Promise.all(state.files.map(shrinkPhoto))) form.append("photos", f);
     form.append("date", $("#date").value);
     state.plan = await api("/api/plan", { method: "POST", body: form });
     $("#mockBadge").hidden = !state.plan.mock;
+    setNotice($("#planNotice"), state.plan.notice);
     renderResults();
     show("results");
   } catch (err) {
@@ -210,6 +218,7 @@ async function pickSpot(location, button) {
       .map((s) => `<li><strong>${esc(s.title)}</strong><span>${esc(s.direction)}</span><em>${esc(s.when)}</em></li>`)
       .join("");
     $("#shotTips").textContent = state.shots.tips;
+    setNotice($("#shotsNotice"), state.shots.notice);
     show("shots");
   } catch (err) {
     setError(err.message);

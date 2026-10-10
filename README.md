@@ -14,6 +14,8 @@ share         ─► /p.html#…           ─► client opens the proposal from
 
 Nothing is stored. Uploaded photos live in memory for a single request.
 
+If Gemini is slow or down, the app still works: calls time out (25s analysis, 20s shot list), hiccups get one retry, and the photographer picks style tags by hand or gets a basic shot list. Photos are shrunk in the browser to 1600px before upload.
+
 ## Run it locally
 
 ```bash
@@ -40,7 +42,7 @@ For real AI, get a free key at aistudio.google.com and start with `GEMINI_API_KE
 | Teammate 1: Frontend | `public/index.html`, `public/app.js`, `public/proposal.js`, `public/style.css` | Make the 4 screens feel like a real product | Spot cards and the proposal look demo-ready |
 | Teammate 2: Dataset + matching | `data/locations.json`, `lib/match.js`, `lib/match.test.js` | Grow to 12 to 15 Atlanta spots with real photos | `npm run test-match` passes |
 | Frankelly (frankellyfeliz): Gemini | `lib/gemini.js`, `data/vocabulary.json` | Real moodboard analysis and shot lists | 3 real photos come back with sensible tags |
-| Andrew: Backend, timing, reliability | `server.js`, `lib/timing.js`, `public/share.js`, `public/p.html` | Weather-smart timing, shareable proposal links, demo never breaks | No crashes; right golden-hour window picked from the forecast |
+| Andrew: Backend, timing, reliability | `server.js`, `lib/timing.js`, `lib/reliability.js`, `public/share.js`, `public/shrink.js`, `public/p.html` | Weather-smart timing, shareable proposal links, demo never breaks | No crashes; right golden-hour window picked from the forecast |
 
 ## Rules
 

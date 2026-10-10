@@ -139,3 +139,5 @@ dd { margin: 0; }
 .ghost-btn { background: var(--surface); color: var(--ink); border-color: var(--line); margin-left: auto; margin-right: 8px; }
 .actions { gap: 8px; flex-wrap: wrap; }
 body.shared main { padding-top: 40px; }
+.notice { border: 1px solid var(--warn); color: var(--ink); background: var(--surface); border-radius: 10px; padding: 10px 14px; margin: 0 0 16px; }
+.notice::before { content: "⚠ "; color: var(--warn); }
