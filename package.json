@@ -1,0 +1,19 @@
+{
+  "name": "spotfinder",
+  "version": "0.1.0",
+  "description": "From moodboard to shoot-ready proposal. Hacklanta 2026.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test-match": "node lib/match.test.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "suncalc": "^1.9.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
