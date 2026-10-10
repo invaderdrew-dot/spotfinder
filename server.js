@@ -1,66 +1,82 @@
-// OWNER: Teammate 4 (backend). Wires everything together.
-// Zero data: images stay in memory only, nothing is written to disk or a database.
+// Owner: Teammate 4 (backend + timing)
+// Photos are held in memory for one request only. Nothing is written to disk or a database.
 import express from "express";
 import multer from "multer";
-import { readFileSync } from "fs";
-import { analyzeImages, shotList, USING_MOCK } from "./lib/gemini.js";
+import { readFileSync } from "node:fs";
+import { analyzeMoodboard, planShots, MOCK } from "./lib/gemini.js";
 import { rankLocations } from "./lib/match.js";
 import { goldenHour, weather } from "./lib/timing.js";
 
 const app = express();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024, files: 3 } });
-const locations = () => JSON.parse(readFileSync(new URL("./data/locations.json", import.meta.url)));
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024, files: 3 },
+  fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
+});
 
-app.use(express.json());
+// Read on every request so dataset edits show up without a restart.
+const loadLocations = () => JSON.parse(readFileSync(new URL("./data/locations.json", import.meta.url)));
+const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+app.use(express.json({ limit: "1mb" }));
 app.use(express.static("public"));
 
-// 1) Photos + date in -> aesthetic profile + top 3 locations (with timing)
-app.post("/api/plan", upload.array("photos", 3), async (req, res) => {
+app.get("/api/health", (_req, res) => res.json({ ok: true, mock: MOCK }));
+
+// Step 1: moodboard + date -> aesthetic profile and top 3 spots with timing and weather.
+app.post("/api/plan", upload.array("photos", 3), async (req, res, next) => {
   try {
-    const date = req.body.date || new Date().toISOString().slice(0, 10);
-    if (!req.files?.length && !USING_MOCK) return res.status(400).json({ error: "Upload 1 to 3 photos" });
-    const profile = await analyzeImages(req.files || []);
-    const top = rankLocations(profile, locations());
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(req.body.date ?? "") ? req.body.date : today();
+    if (!req.files?.length && !MOCK) return res.status(400).json({ error: "Upload 1 to 3 photos." });
+
+    const profile = await analyzeMoodboard(req.files ?? []);
     const matches = await Promise.all(
-      top.map(async (loc) => ({
+      rankLocations(profile, loadLocations()).map(async (loc) => ({
         ...loc,
         timing: goldenHour(date, loc.lat, loc.lng),
         weather: await weather(date, loc.lat, loc.lng),
       }))
     );
-    res.json({ date, profile, matches });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message });
+    res.json({ date, mock: MOCK, profile, matches });
+  } catch (err) {
+    next(err);
   }
 });
 
-// 2) Profile + chosen location -> shot list
-app.post("/api/shotlist", async (req, res) => {
+// Step 2: profile + chosen spot -> shot list.
+app.post("/api/shotlist", async (req, res, next) => {
   try {
-    const { profile, location } = req.body;
-    res.json(await shotList(profile, location, location.timing || { window: "late afternoon" }));
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message });
+    const { profile, location } = req.body ?? {};
+    if (!profile || !location?.name) return res.status(400).json({ error: "Missing profile or location." });
+    res.json(await planShots(profile, location, location.timing ?? { window: "late afternoon", sunset: "sunset" }));
+  } catch (err) {
+    next(err);
   }
 });
 
-// 3) Plan + pricing -> proposal data. Price math is deterministic, never AI.
+// Step 3: plan + photographer's rate -> proposal. Pricing is plain arithmetic and never comes from AI.
 app.post("/api/proposal", (req, res) => {
-  const { clientName, date, location, plan, rate, hours } = req.body;
-  const r = Number(rate) || 0;
-  const h = Number(hours) || 0;
+  const { clientName, photographerName, date, location, profile, shots, rate, hours } = req.body ?? {};
+  const r = Math.max(0, Number(rate) || 0);
+  const h = Math.max(0, Number(hours) || 0);
   res.json({
-    clientName: clientName || "Client",
+    clientName: clientName?.trim() || "Client",
+    photographerName: photographerName?.trim() || "",
     date,
     location,
-    plan,
+    profile,
+    shots,
     pricing: { rate: r, hours: h, total: Math.round(r * h * 100) / 100 },
   });
 });
 
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  const status = err instanceof multer.MulterError ? 400 : 500;
+  res.status(status).json({ error: err.message || "Something went wrong." });
+});
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () =>
-  console.log(`Spot Finder on :${PORT} ${USING_MOCK ? "(MOCK mode: add GEMINI_API_KEY to Secrets)" : "(Gemini live)"}`)
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Spot Finder running on port ${PORT} ${MOCK ? "(mock mode: set GEMINI_API_KEY for real AI)" : "(Gemini live)"}`);
+});

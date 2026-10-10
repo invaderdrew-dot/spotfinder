@@ -1,132 +1,213 @@
-// OWNER: Teammate 1 (frontend). Holds state in memory only (zero data).
-const state = { date: null, profile: null, matches: [], chosen: null, plan: null };
-const $ = (id) => document.getElementById(id);
+// Owner: Teammate 1 (frontend)
+const $ = (sel) => document.querySelector(sel);
+const state = { files: [], plan: null, location: null, shots: null };
 
+const esc = (s) =>
+  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const prettyDate = (d) =>
+  new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+const money = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+
+// ---------- navigation ----------
 function show(id) {
-  document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
-  window.scrollTo(0, 0);
+  document.querySelectorAll(".screen").forEach((s) => (s.hidden = s.id !== id));
+  const order = ["upload", "results", "shots", "proposal"];
+  document.querySelectorAll("#steps li").forEach((li) => {
+    const i = order.indexOf(li.dataset.step);
+    li.classList.toggle("active", li.dataset.step === id);
+    li.classList.toggle("done", i < order.indexOf(id));
+  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => show(b.dataset.go)));
 
-function loading(on, text) {
-  $("loading").hidden = !on;
-  if (text) $("loading-text").textContent = text;
+function setError(msg) {
+  $("#error").hidden = !msg;
+  $("#error").textContent = msg || "";
 }
 
-// ---------- Screen 1: brief ----------
-$("date").value = new Date().toISOString().slice(0, 10);
-const drop = $("drop");
-const input = $("photos");
-["dragover", "dragenter"].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.add("over"); }));
-["dragleave", "drop"].forEach((e) => drop.addEventListener(e, () => drop.classList.remove("over")));
-drop.addEventListener("drop", (ev) => { ev.preventDefault(); input.files = ev.dataTransfer.files; preview(); });
-input.addEventListener("change", preview);
+async function api(path, options) {
+  const res = await fetch(path, options);
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || `Request failed (${res.status})`);
+  return body;
+}
 
-function preview() {
-  const files = [...input.files].slice(0, 3);
-  $("previews").innerHTML = "";
-  files.forEach((f) => {
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(f);
-    $("previews").appendChild(img);
+function busy(button, label) {
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = label;
+  return () => {
+    button.disabled = false;
+    button.textContent = original;
+  };
+}
+
+// ---------- 1. moodboard ----------
+$("#date").value = new Date().toLocaleDateString("en-CA");
+
+function addFiles(list) {
+  state.files = [...state.files, ...[...list].filter((f) => f.type.startsWith("image/"))].slice(0, 3);
+  $("#thumbs").innerHTML = "";
+  state.files.forEach((f, i) => {
+    const wrap = document.createElement("div");
+    wrap.className = "thumb";
+    wrap.innerHTML = `<img alt="Inspiration photo ${i + 1}" /><button type="button" aria-label="Remove photo">×</button>`;
+    wrap.querySelector("img").src = URL.createObjectURL(f);
+    wrap.querySelector("button").onclick = () => {
+      state.files.splice(i, 1);
+      addFiles([]);
+    };
+    $("#thumbs").append(wrap);
   });
-  $("drop-text").textContent = files.length ? `${files.length} photo(s) ready` : "Click or drag inspiration photos here";
 }
+$("#photos").addEventListener("change", (e) => {
+  addFiles(e.target.files);
+  e.target.value = "";
+});
+const drop = $("#drop");
+["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => (e.preventDefault(), drop.classList.add("over"))));
+["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove("over")));
+drop.addEventListener("drop", (e) => {
+  e.preventDefault();
+  addFiles(e.dataTransfer.files);
+});
 
-$("brief-form").addEventListener("submit", async (ev) => {
-  ev.preventDefault();
-  const fd = new FormData();
-  [...input.files].slice(0, 3).forEach((f) => fd.append("photos", f));
-  fd.append("date", $("date").value);
-  loading(true, "Reading your moodboard…");
+$("#planForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  setError("");
+  const done = busy($("#planBtn"), "Reading the moodboard…");
   try {
-    const res = await fetch("/api/plan", { method: "POST", body: fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    Object.assign(state, { date: data.date, profile: data.profile, matches: data.matches });
-    renderMatches();
-    show("screen-matches");
-  } catch (e) {
-    alert("Something went wrong: " + e.message);
+    const form = new FormData();
+    state.files.forEach((f) => form.append("photos", f));
+    form.append("date", $("#date").value);
+    state.plan = await api("/api/plan", { method: "POST", body: form });
+    $("#mockBadge").hidden = !state.plan.mock;
+    renderResults();
+    show("results");
+  } catch (err) {
+    setError(err.message);
   } finally {
-    loading(false);
+    done();
   }
 });
 
-// ---------- Screen 2: matches ----------
-function renderMatches() {
-  const p = state.profile;
-  $("summary").textContent = p.summary;
-  $("chips").innerHTML = ["aesthetic", "mood", "colors", "environment"]
-    .flatMap((k) => (p[k] || []).map((t) => `<span class="chip"><b>${k}</b>${t}</span>`))
+// ---------- 2. matches ----------
+function renderResults() {
+  const { profile, matches, date } = state.plan;
+  const chips = ["aesthetic", "mood", "colors", "environment"]
+    .flatMap((k) => profile[k].map((t) => `<span class="chip ${k}">${esc(t)}</span>`))
     .join("");
-  $("cards").innerHTML = state.matches
-    .map(
-      (m, i) => `
-    <div class="card">
-      <div class="hero" style="${m.photoUrl ? `background-image:url('${m.photoUrl}')` : ""}">${m.photoUrl ? "" : "Add a photo in data/locations.json"}</div>
-      <div class="body">
-        <h3>${m.name}</h3>
-        <div class="meta">${m.neighborhood}</div>
-        <div class="why">${m.why}</div>
-        <div class="meta">${m.timing.label}: ${m.timing.window}</div>
-        <div class="meta">${m.weather.available ? `High ${m.weather.highF}°F · ${m.weather.rainChance}% rain` : m.weather.note}</div>
-        <button class="cta" data-pick="${i}">Plan Shoot Here</button>
-      </div>
-    </div>`
-    )
+  $("#profile").innerHTML = `<h3>The look</h3><p>${esc(profile.summary)}</p><div class="chips">${chips}</div>`;
+  $("#resultsDate").textContent = prettyDate(date);
+
+  $("#matches").innerHTML = matches
+    .map((m, i) => {
+      const wx = m.weather.available
+        ? `${m.weather.highF}°F high${m.weather.rainChance != null ? ` · ${m.weather.rainChance}% rain` : ""}`
+        : esc(m.weather.note);
+      const photo = m.photoUrl
+        ? `<img src="${esc(m.photoUrl)}" alt="${esc(m.name)}" />`
+        : `<div class="placeholder">${esc(m.name)}</div>`;
+      return `
+      <article class="spot card">
+        <div class="photo">${photo}<span class="score">${Math.round(m.score * 100)}% match</span></div>
+        <h3>${esc(m.name)}</h3>
+        <p class="muted">${esc(m.neighborhood)}</p>
+        <p>${esc(m.why)}</p>
+        <dl>
+          <dt>Golden hour</dt><dd>${esc(m.timing.window)}</dd>
+          <dt>Weather</dt><dd>${wx}</dd>
+          <dt>Access</dt><dd>${esc(m.accessNotes.replace(/^VERIFY:\s*/, ""))}</dd>
+        </dl>
+        ${m.verified ? "" : `<p class="unverified">Details not checked yet</p>`}
+        <button class="primary" data-pick="${i}">Plan this spot</button>
+      </article>`;
+    })
     .join("");
-  document.querySelectorAll("[data-pick]").forEach((b) => b.addEventListener("click", () => pick(+b.dataset.pick)));
+
+  $("#matches").querySelectorAll("[data-pick]").forEach((b) =>
+    b.addEventListener("click", () => pickSpot(state.plan.matches[b.dataset.pick], b))
+  );
 }
 
-// ---------- Screen 3: plan ----------
-async function pick(i) {
-  state.chosen = state.matches[i];
-  loading(true, "Planning your shots…");
+// ---------- 3. shot list ----------
+async function pickSpot(location, button) {
+  setError("");
+  const done = busy(button, "Writing shot list…");
   try {
-    const res = await fetch("/api/shotlist", {
+    state.location = location;
+    state.shots = await api("/api/shotlist", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile: state.profile, location: state.chosen }),
+      body: JSON.stringify({ profile: state.plan.profile, location }),
     });
-    state.plan = await res.json();
-    if (!res.ok) throw new Error(state.plan.error);
-    renderPlan();
-    show("screen-plan");
-  } catch (e) {
-    alert("Something went wrong: " + e.message);
+    $("#shotsTitle").textContent = `Shot list: ${location.name}`;
+    $("#shotsTiming").textContent = `${prettyDate(state.plan.date)} · Golden hour ${location.timing.window}`;
+    $("#shotList").innerHTML = state.shots.shots
+      .map((s) => `<li><strong>${esc(s.title)}</strong><span>${esc(s.direction)}</span><em>${esc(s.when)}</em></li>`)
+      .join("");
+    $("#shotTips").textContent = state.shots.tips;
+    show("shots");
+  } catch (err) {
+    setError(err.message);
   } finally {
-    loading(false);
+    done();
   }
 }
 
-function renderPlan() {
-  const c = state.chosen;
-  $("plan").innerHTML = `
-    <p class="sub">${state.plan.creativeDirection}</p>
-    <p><b>${c.name}</b> · ${c.timing.label}: ${c.timing.window}</p>
-    ${state.plan.shots.map((s, i) => `<div class="shot"><span class="n">${String(i + 1).padStart(2, "0")}</span><div><b>${s.title}</b><br>${s.direction}</div></div>`).join("")}`;
+// ---------- 4. proposal ----------
+$("#proposalForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  setError("");
+  try {
+    const fields = Object.fromEntries(new FormData(e.target));
+    const p = await api("/api/proposal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...fields,
+        date: state.plan.date,
+        location: state.location,
+        profile: state.plan.profile,
+        shots: state.shots.shots,
+      }),
+    });
+    renderProposal(p);
+    show("proposal");
+  } catch (err) {
+    setError(err.message);
+  }
+});
+
+function renderProposal(p) {
+  const loc = p.location;
+  $("#doc").innerHTML = `
+    <header>
+      <p class="eyebrow">Shoot proposal${p.photographerName ? ` · ${esc(p.photographerName)}` : ""}</p>
+      <h1>${esc(p.clientName)}</h1>
+      <p>${prettyDate(p.date)}</p>
+    </header>
+    <section>
+      <h2>The look</h2>
+      <p>${esc(p.profile.summary)}</p>
+    </section>
+    <section>
+      <h2>Location</h2>
+      <p><strong>${esc(loc.name)}</strong>, ${esc(loc.neighborhood)}, Atlanta</p>
+      <p>Call time is set for golden hour, <strong>${esc(loc.timing.window)}</strong>. Sunset is at ${esc(loc.timing.sunset)}.</p>
+    </section>
+    <section>
+      <h2>Shot list</h2>
+      <ol>${p.shots.map((s) => `<li><strong>${esc(s.title)}.</strong> ${esc(s.direction)}</li>`).join("")}</ol>
+    </section>
+    <section class="price">
+      <h2>Investment</h2>
+      <table>
+        <tr><td>${p.pricing.hours} hours × ${money(p.pricing.rate)}/hr</td><td>${money(p.pricing.total)}</td></tr>
+        <tr class="total"><td>Total</td><td>${money(p.pricing.total)}</td></tr>
+      </table>
+    </section>`;
 }
 
-// ---------- Screen 4: proposal ----------
-$("make-proposal").addEventListener("click", async () => {
-  const res = await fetch("/api/proposal", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      clientName: $("client").value, date: state.date, location: state.chosen,
-      plan: state.plan, rate: $("rate").value, hours: $("hours").value,
-    }),
-  });
-  const p = await res.json();
-  const money = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-  $("proposal").innerHTML = `
-    <h2>Shoot Proposal for ${p.clientName}</h2>
-    <div class="meta">${new Date(p.date + "T12:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</div>
-    <div class="hero" style="${p.location.photoUrl ? `background-image:url('${p.location.photoUrl}')` : ""}"></div>
-    <h4>Creative direction</h4><p>${p.plan.creativeDirection}</p>
-    <h4>Location</h4><p><b>${p.location.name}</b>, ${p.location.neighborhood}<br>${p.location.timing.label}: ${p.location.timing.window}</p>
-    <h4>Shot list</h4>${p.plan.shots.map((s, i) => `<div class="shot"><span class="n">${String(i + 1).padStart(2, "0")}</span><div><b>${s.title}</b><br>${s.direction}</div></div>`).join("")}
-    <h4>Pricing</h4><p>${money(p.pricing.rate)}/hr × ${p.pricing.hours} hrs</p><p class="total">${money(p.pricing.total)}</p>`;
-  show("screen-proposal");
-});
+show("upload");

@@ -1,5 +1,5 @@
 {
-  "_note": "The ONLY tags Gemini may return and the ONLY tags locations may use. Change this list together as a team, never alone.",
+  "_rule": "Shared tag list. Gemini may only return these tags and locations may only use these tags. Change it as a team.",
   "aesthetic": ["editorial", "streetwear", "romantic", "luxury", "vintage", "minimal", "edgy", "natural", "glam", "casual"],
   "mood": ["cinematic", "bold", "soft", "moody", "playful", "serene", "energetic", "dreamy"],
   "colors": ["neutral", "muted", "warm", "cool", "vibrant", "pastel", "monochrome", "earthy"],
