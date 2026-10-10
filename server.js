@@ -5,7 +5,7 @@ import multer from "multer";
 import { readFileSync } from "node:fs";
 import { analyzeMoodboard, planShots, MOCK } from "./lib/gemini.js";
 import { rankLocations } from "./lib/match.js";
-import { goldenHour, weather } from "./lib/timing.js";
+import { planTiming } from "./lib/timing.js";
 
 const app = express();
 const upload = multer({
@@ -26,11 +26,7 @@ const validDate = (d) => (/^\d{4}-\d{2}-\d{2}$/.test(d ?? "") ? d : today());
 
 const topMatches = (profile, date) =>
   Promise.all(
-    rankLocations(profile, loadLocations()).map(async (loc) => ({
-      ...loc,
-      timing: goldenHour(date, loc.lat, loc.lng),
-      weather: await weather(date, loc.lat, loc.lng),
-    }))
+    rankLocations(profile, loadLocations()).map(async (loc) => ({ ...loc, ...(await planTiming(date, loc.lat, loc.lng)) }))
   );
 
 app.get("/api/health", (_req, res) => res.json({ ok: true, mock: MOCK }));

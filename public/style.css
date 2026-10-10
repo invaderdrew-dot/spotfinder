@@ -135,3 +135,4 @@ dd { margin: 0; }
   main { padding: 0; }
   .doc { box-shadow: none; padding: 0; max-width: none; }
 }
+.warn { color: var(--warn); }

@@ -180,10 +180,12 @@ function renderMatches() {
         <p class="muted">${esc(m.neighborhood)}${unverified(m.address) ? "" : ` · ${esc(m.address)}`} · <a href="${mapLink(m)}" target="_blank" rel="noopener">Map</a></p>
         <p>${esc(m.why)}</p>
         <dl>
-          <dt>Golden hour</dt><dd>${esc(m.timing.window)}</dd>
+          <dt>Best light</dt><dd>${esc(m.timing.window)} <span class="muted small">(${esc(m.timing.pick)})</span></dd>
           <dt>Weather</dt><dd>${wx}</dd>
           <dt>Access</dt><dd>${esc(m.accessNotes.replace(/^VERIFY:\s*/, ""))}</dd>
         </dl>
+        <p class="small">${esc(m.timing.reason)}</p>
+        ${m.timing.warning ? `<p class="warn small">⚠ ${esc(m.timing.warning)}</p>` : ""}
         ${m.verified ? "" : `<p class="unverified">Details not checked yet</p>`}
         <button class="primary" data-pick="${i}">Plan this spot</button>
       </article>`;
@@ -207,7 +209,7 @@ async function pickSpot(location, button) {
       body: JSON.stringify({ profile: state.plan.profile, location }),
     });
     $("#shotsTitle").textContent = `Shot list: ${location.name}`;
-    $("#shotsTiming").textContent = `${prettyDate(state.plan.date)} · Golden hour ${location.timing.window}`;
+    $("#shotsTiming").textContent = `${prettyDate(state.plan.date)} · ${location.timing.label} ${location.timing.window}`;
     $("#shotList").innerHTML = state.shots.shots
       .map((s) => `<li><strong>${esc(s.title)}</strong><span>${esc(s.direction)}</span><em>${esc(s.when)}</em></li>`)
       .join("");
@@ -261,7 +263,8 @@ function renderProposal(p) {
       ${loc.photoUrl ? `<img class="hero" src="${esc(loc.photoUrl)}" alt="${esc(loc.name)}" />` : ""}
       <p><strong>${esc(loc.name)}</strong>, ${esc(loc.neighborhood)}, Atlanta</p>
       <p>${unverified(loc.address) ? "" : `${esc(loc.address)} · `}<a href="${mapLink(loc)}" target="_blank" rel="noopener">Open in Google Maps</a></p>
-      <p>Call time is set for golden hour, <strong>${esc(loc.timing.window)}</strong>. Sunset is at ${esc(loc.timing.sunset)}.</p>
+      <p>Suggested shooting window: <strong>${esc(loc.timing.label.toLowerCase())}, ${esc(loc.timing.window)}</strong>. ${esc(loc.timing.reason)}</p>
+      ${loc.timing.warning ? `<p><em>${esc(loc.timing.warning)}</em></p>` : ""}
     </section>
     <section>
       <h2>Shot list</h2>

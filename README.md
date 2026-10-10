@@ -38,9 +38,8 @@ For real AI, get a free key at aistudio.google.com and start with `GEMINI_API_KE
 |---|---|---|---|
 | Teammate 1: Frontend | `public/index.html`, `public/app.js`, `public/style.css` | Make the 4 screens feel like a real product | Spot cards and the proposal look demo-ready |
 | Teammate 2: Dataset + matching | `data/locations.json`, `lib/match.js`, `lib/match.test.js` | Grow to 12 to 15 Atlanta spots with real photos | `npm run test-match` passes |
-| Teammate 3: Gemini | `lib/gemini.js`, `data/vocabulary.json` | Real moodboard analysis and shot lists | 3 real photos come back with sensible tags |
-| Teammate 4: Backend + timing | `server.js`, `lib/timing.js` | Solid endpoints, real weather | No crashes; weather shows for dates up to ~2 weeks out |
-| Andrew | Repo, Replit hosting, demo moodboards, pitch | Demo running on Replit | Demo flow rehearsed |
+| Frankelly (frankellyfeliz): Gemini | `lib/gemini.js`, `data/vocabulary.json` | Real moodboard analysis and shot lists | 3 real photos come back with sensible tags |
+| Andrew: Backend, timing, reliability | `server.js`, `lib/timing.js`, `public/p.html` | Weather-smart timing, shareable proposal links, demo never breaks | No crashes; right golden-hour window picked from the forecast |
 
 ## Rules
 
