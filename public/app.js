@@ -2,6 +2,7 @@
 import { esc, prettyDate, mapLink, unverified, proposalHTML } from "/proposal.js";
 import { shareLink } from "/share.js";
 import { shrinkPhoto } from "/shrink.js";
+import { wireListenButton, stopNarration } from "/narrate.js";
 
 const $ = (sel) => document.querySelector(sel);
 const state = { files: [], plan: null, location: null, shots: null };
@@ -9,6 +10,7 @@ const state = { files: [], plan: null, location: null, shots: null };
 
 // ---------- navigation ----------
 function show(id) {
+  if (id !== "proposal") stopNarration();
   document.querySelectorAll(".screen").forEach((s) => (s.hidden = s.id !== id));
   const order = ["upload", "results", "shots", "proposal"];
   document.querySelectorAll("#steps li").forEach((li) => {
@@ -256,6 +258,8 @@ function renderProposal(p) {
   $("#doc").innerHTML = proposalHTML(p);
   $("#shareStatus").textContent = "";
 }
+
+wireListenButton($("#listenBtn"), () => state.proposal);
 
 // Client share link: the proposal travels inside the link, nothing is stored.
 $("#shareBtn").addEventListener("click", async () => {
