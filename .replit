@@ -1,4 +1,4 @@
-modules = ["nodejs-20"]
+modules = ["nodejs-20", "web"]
 run = "npm install && npm start"
 
 [[ports]]
@@ -7,3 +7,6 @@ externalPort = 80
 
 [deployment]
 run = ["sh", "-c", "npm install && npm start"]
+
+[nix]
+channel = "stable-25_05"
