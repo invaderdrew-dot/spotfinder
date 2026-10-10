@@ -136,3 +136,6 @@ dd { margin: 0; }
   .doc { box-shadow: none; padding: 0; max-width: none; }
 }
 .warn { color: var(--warn); }
+.ghost-btn { background: var(--surface); color: var(--ink); border-color: var(--line); margin-left: auto; margin-right: 8px; }
+.actions { gap: 8px; flex-wrap: wrap; }
+body.shared main { padding-top: 40px; }

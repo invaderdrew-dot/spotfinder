@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Shoot proposal</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="shared">
+  <!-- Owner: Andrew. The client-facing page a share link opens. -->
+  <main>
+    <article class="doc" id="doc"><p>Opening proposal…</p></article>
+    <div class="actions no-print">
+      <p class="muted small">This proposal lives only in its link. Nothing is stored on a server.</p>
+      <button class="primary" onclick="window.print()">Print or save PDF</button>
+    </div>
+  </main>
+  <script type="module">
+    import { readShareLink } from "/share.js";
+    import { proposalHTML } from "/proposal.js";
+
+    async function render() {
+      const p = await readShareLink(location.hash);
+      const doc = document.getElementById("doc");
+      const actions = document.querySelector(".actions");
+      if (!p) {
+        doc.innerHTML = "<h1>This link doesn't work</h1><p>It may have been cut off when it was copied. Ask your photographer to send it again.</p>";
+        actions.style.display = "none";
+        return;
+      }
+      actions.style.display = "";
+      document.title = `Shoot proposal · ${p.clientName || "Client"}`;
+      doc.innerHTML = proposalHTML(p);
+    }
+    render();
+    window.addEventListener("hashchange", render);
+  </script>
+</body>
+</html>

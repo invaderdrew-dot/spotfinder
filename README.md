@@ -9,6 +9,7 @@ photos + date  ─► POST /api/plan      ─► Gemini tags the look ─► mat
 edit tags      ─► POST /api/rematch   ─► re-rank with the corrected tags (no extra Gemini call)
 pick a spot    ─► POST /api/shotlist  ─► Gemini writes 5 to 8 shots for that spot
 rate + hours   ─► POST /api/proposal  ─► printable proposal (pricing is plain code, never AI)
+share         ─► /p.html#…           ─► client opens the proposal from the link itself (nothing stored)
 ```
 
 Nothing is stored. Uploaded photos live in memory for a single request.
@@ -36,10 +37,10 @@ For real AI, get a free key at aistudio.google.com and start with `GEMINI_API_KE
 
 | Person | Files | Goal | Done when |
 |---|---|---|---|
-| Teammate 1: Frontend | `public/index.html`, `public/app.js`, `public/style.css` | Make the 4 screens feel like a real product | Spot cards and the proposal look demo-ready |
+| Teammate 1: Frontend | `public/index.html`, `public/app.js`, `public/proposal.js`, `public/style.css` | Make the 4 screens feel like a real product | Spot cards and the proposal look demo-ready |
 | Teammate 2: Dataset + matching | `data/locations.json`, `lib/match.js`, `lib/match.test.js` | Grow to 12 to 15 Atlanta spots with real photos | `npm run test-match` passes |
 | Frankelly (frankellyfeliz): Gemini | `lib/gemini.js`, `data/vocabulary.json` | Real moodboard analysis and shot lists | 3 real photos come back with sensible tags |
-| Andrew: Backend, timing, reliability | `server.js`, `lib/timing.js`, `public/p.html` | Weather-smart timing, shareable proposal links, demo never breaks | No crashes; right golden-hour window picked from the forecast |
+| Andrew: Backend, timing, reliability | `server.js`, `lib/timing.js`, `public/share.js`, `public/p.html` | Weather-smart timing, shareable proposal links, demo never breaks | No crashes; right golden-hour window picked from the forecast |
 
 ## Rules
 

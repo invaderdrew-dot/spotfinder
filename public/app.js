@@ -1,12 +1,10 @@
 // Owner: Teammate 1 (frontend)
+import { esc, prettyDate, mapLink, unverified, proposalHTML } from "/proposal.js";
+import { shareLink } from "/share.js";
+
 const $ = (sel) => document.querySelector(sel);
 const state = { files: [], plan: null, location: null, shots: null };
 
-const esc = (s) =>
-  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-const prettyDate = (d) =>
-  new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-const money = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
 // ---------- navigation ----------
 function show(id) {
@@ -158,8 +156,6 @@ function renderProfile(dirty) {
   });
 }
 
-const mapLink = (m) => `https://www.google.com/maps/search/?api=1&query=${m.lat},${m.lng}`;
-const unverified = (s) => /^VERIFY/.test(s ?? "");
 
 function renderMatches() {
   const { matches, date } = state.plan;
@@ -247,36 +243,20 @@ $("#proposalForm").addEventListener("submit", async (e) => {
 });
 
 function renderProposal(p) {
-  const loc = p.location;
-  $("#doc").innerHTML = `
-    <header>
-      <p class="eyebrow">Shoot proposal${p.photographerName ? ` · ${esc(p.photographerName)}` : ""}</p>
-      <h1>${esc(p.clientName)}</h1>
-      <p>${prettyDate(p.date)}</p>
-    </header>
-    <section>
-      <h2>The look</h2>
-      <p>${esc(p.profile.summary)}</p>
-    </section>
-    <section>
-      <h2>Location</h2>
-      ${loc.photoUrl ? `<img class="hero" src="${esc(loc.photoUrl)}" alt="${esc(loc.name)}" />` : ""}
-      <p><strong>${esc(loc.name)}</strong>, ${esc(loc.neighborhood)}, Atlanta</p>
-      <p>${unverified(loc.address) ? "" : `${esc(loc.address)} · `}<a href="${mapLink(loc)}" target="_blank" rel="noopener">Open in Google Maps</a></p>
-      <p>Suggested shooting window: <strong>${esc(loc.timing.label.toLowerCase())}, ${esc(loc.timing.window)}</strong>. ${esc(loc.timing.reason)}</p>
-      ${loc.timing.warning ? `<p><em>${esc(loc.timing.warning)}</em></p>` : ""}
-    </section>
-    <section>
-      <h2>Shot list</h2>
-      <ol>${p.shots.map((s) => `<li><strong>${esc(s.title)}.</strong> ${esc(s.direction)}</li>`).join("")}</ol>
-    </section>
-    <section class="price">
-      <h2>Investment</h2>
-      <table>
-        <tr><td>${p.pricing.hours} hours × ${money(p.pricing.rate)}/hr</td><td>${money(p.pricing.total)}</td></tr>
-        <tr class="total"><td>Total</td><td>${money(p.pricing.total)}</td></tr>
-      </table>
-    </section>`;
+  state.proposal = p;
+  $("#doc").innerHTML = proposalHTML(p);
+  $("#shareStatus").textContent = "";
 }
+
+// Client share link: the proposal travels inside the link, nothing is stored.
+$("#shareBtn").addEventListener("click", async () => {
+  const link = await shareLink(state.proposal);
+  try {
+    await navigator.clipboard.writeText(link);
+    $("#shareStatus").textContent = "Link copied. Text or email it to your client.";
+  } catch {
+    window.prompt("Copy this link for your client:", link);
+  }
+});
 
 show("upload");
