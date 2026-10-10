@@ -3,10 +3,23 @@
     "id": "atl-001",
     "name": "Krog Street Tunnel",
     "neighborhood": "Cabbagetown",
-    "aesthetic": ["streetwear", "edgy"],
-    "mood": ["bold", "energetic"],
-    "colors": ["vibrant"],
-    "environment": ["street-art", "urban", "industrial"],
+    "address": "VERIFY: street address",
+    "aesthetic": [
+      "streetwear",
+      "edgy"
+    ],
+    "mood": [
+      "bold",
+      "energetic"
+    ],
+    "colors": [
+      "vibrant"
+    ],
+    "environment": [
+      "street-art",
+      "urban",
+      "industrial"
+    ],
     "lightingNotes": "VERIFY: shaded inside; the cleanest light is at the two openings.",
     "accessNotes": "VERIFY: public underpass with car and foot traffic. Bring a spotter.",
     "photoUrl": "",
@@ -18,10 +31,22 @@
     "id": "atl-002",
     "name": "Jackson Street Bridge",
     "neighborhood": "Old Fourth Ward",
-    "aesthetic": ["editorial", "casual"],
-    "mood": ["cinematic", "dreamy"],
-    "colors": ["warm"],
-    "environment": ["skyline", "urban"],
+    "address": "VERIFY: street address",
+    "aesthetic": [
+      "editorial",
+      "casual"
+    ],
+    "mood": [
+      "cinematic",
+      "dreamy"
+    ],
+    "colors": [
+      "warm"
+    ],
+    "environment": [
+      "skyline",
+      "urban"
+    ],
     "lightingNotes": "VERIFY: skyline faces west, so sunset backlights the city.",
     "accessNotes": "VERIFY: narrow public sidewalk that gets crowded at sunset.",
     "photoUrl": "",
@@ -33,10 +58,24 @@
     "id": "atl-003",
     "name": "Historic Fourth Ward Park",
     "neighborhood": "Old Fourth Ward",
-    "aesthetic": ["romantic", "natural"],
-    "mood": ["soft", "serene", "dreamy"],
-    "colors": ["pastel", "earthy"],
-    "environment": ["greenery", "water"],
+    "address": "VERIFY: street address",
+    "aesthetic": [
+      "romantic",
+      "natural"
+    ],
+    "mood": [
+      "soft",
+      "serene",
+      "dreamy"
+    ],
+    "colors": [
+      "pastel",
+      "earthy"
+    ],
+    "environment": [
+      "greenery",
+      "water"
+    ],
     "lightingNotes": "VERIFY: pond and lawn give soft, even light in the evening.",
     "accessNotes": "VERIFY: city park. Check whether paid shoots need a permit.",
     "photoUrl": "",
@@ -48,10 +87,25 @@
     "id": "atl-004",
     "name": "Piedmont Park",
     "neighborhood": "Midtown",
-    "aesthetic": ["romantic", "natural", "casual"],
-    "mood": ["serene", "playful"],
-    "colors": ["earthy", "warm"],
-    "environment": ["greenery", "skyline", "water"],
+    "address": "VERIFY: street address",
+    "aesthetic": [
+      "romantic",
+      "natural",
+      "casual"
+    ],
+    "mood": [
+      "serene",
+      "playful"
+    ],
+    "colors": [
+      "earthy",
+      "warm"
+    ],
+    "environment": [
+      "greenery",
+      "skyline",
+      "water"
+    ],
     "lightingNotes": "VERIFY: open meadow with a skyline view; little shade at midday.",
     "accessNotes": "VERIFY: Piedmont Park Conservancy has rules for commercial photography.",
     "photoUrl": "",
@@ -63,10 +117,25 @@
     "id": "atl-005",
     "name": "Ponce City Market (exterior)",
     "neighborhood": "Old Fourth Ward",
-    "aesthetic": ["luxury", "editorial", "vintage"],
-    "mood": ["cinematic", "bold"],
-    "colors": ["warm", "neutral"],
-    "environment": ["architecture", "historic", "urban"],
+    "address": "VERIFY: street address",
+    "aesthetic": [
+      "luxury",
+      "editorial",
+      "vintage"
+    ],
+    "mood": [
+      "cinematic",
+      "bold"
+    ],
+    "colors": [
+      "warm",
+      "neutral"
+    ],
+    "environment": [
+      "architecture",
+      "historic",
+      "urban"
+    ],
     "lightingNotes": "VERIFY: brick facade glows warm late in the day.",
     "accessNotes": "VERIFY: private property. Ask management before any paid shoot.",
     "photoUrl": "",

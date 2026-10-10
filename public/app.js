@@ -93,12 +93,76 @@ $("#planForm").addEventListener("submit", async (e) => {
 });
 
 // ---------- 2. matches ----------
+const CATEGORIES = ["aesthetic", "mood", "colors", "environment"];
+let vocabulary = null;
+api("/api/vocabulary").then((v) => (vocabulary = v)).catch(() => {});
+
 function renderResults() {
-  const { profile, matches, date } = state.plan;
-  const chips = ["aesthetic", "mood", "colors", "environment"]
-    .flatMap((k) => profile[k].map((t) => `<span class="chip ${k}">${esc(t)}</span>`))
-    .join("");
-  $("#profile").innerHTML = `<h3>The look</h3><p>${esc(profile.summary)}</p><div class="chips">${chips}</div>`;
+  renderProfile(false);
+  renderMatches();
+}
+
+// Style tags are editable so the photographer can correct how Gemini read the moodboard.
+function renderProfile(dirty) {
+  const { profile } = state.plan;
+  const chips = CATEGORIES.flatMap((k) =>
+    profile[k].map(
+      (t) => `<span class="chip ${k}">${esc(t)}<button type="button" data-remove="${k}:${esc(t)}" aria-label="Remove ${esc(t)}">×</button></span>`
+    )
+  ).join("");
+  const options = vocabulary
+    ? CATEGORIES.map(
+        (k) =>
+          `<optgroup label="${k}">${vocabulary[k]
+            .filter((t) => !profile[k].includes(t))
+            .map((t) => `<option value="${k}:${t}">${t}</option>`)
+            .join("")}</optgroup>`
+      ).join("")
+    : "";
+  $("#profile").innerHTML = `
+    <h3>The look</h3>
+    <p>${esc(profile.summary)}</p>
+    <div class="chips">${chips}
+      ${options ? `<select id="addTag" aria-label="Add a style tag"><option value="">+ Add tag</option>${options}</select>` : ""}
+    </div>
+    <p class="muted small">Not quite right? Remove or add tags, then update the spots.</p>
+    ${dirty ? `<button class="primary" id="rematch">Update spots</button>` : ""}`;
+
+  $("#profile").querySelectorAll("[data-remove]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const [k, t] = b.dataset.remove.split(":");
+      profile[k] = profile[k].filter((x) => x !== t);
+      renderProfile(true);
+    })
+  );
+  $("#addTag")?.addEventListener("change", (e) => {
+    const [k, t] = e.target.value.split(":");
+    if (k) profile[k] = [...profile[k], t];
+    renderProfile(true);
+  });
+  $("#rematch")?.addEventListener("click", async (e) => {
+    setError("");
+    const done = busy(e.target, "Updating…");
+    try {
+      const { matches } = await api("/api/rematch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile, date: state.plan.date }),
+      });
+      state.plan.matches = matches;
+      renderResults();
+    } catch (err) {
+      setError(err.message);
+      done();
+    }
+  });
+}
+
+const mapLink = (m) => `https://www.google.com/maps/search/?api=1&query=${m.lat},${m.lng}`;
+const unverified = (s) => /^VERIFY/.test(s ?? "");
+
+function renderMatches() {
+  const { matches, date } = state.plan;
   $("#resultsDate").textContent = prettyDate(date);
 
   $("#matches").innerHTML = matches
@@ -113,7 +177,7 @@ function renderResults() {
       <article class="spot card">
         <div class="photo">${photo}<span class="score">${Math.round(m.score * 100)}% match</span></div>
         <h3>${esc(m.name)}</h3>
-        <p class="muted">${esc(m.neighborhood)}</p>
+        <p class="muted">${esc(m.neighborhood)}${unverified(m.address) ? "" : ` · ${esc(m.address)}`} · <a href="${mapLink(m)}" target="_blank" rel="noopener">Map</a></p>
         <p>${esc(m.why)}</p>
         <dl>
           <dt>Golden hour</dt><dd>${esc(m.timing.window)}</dd>
@@ -194,7 +258,9 @@ function renderProposal(p) {
     </section>
     <section>
       <h2>Location</h2>
+      ${loc.photoUrl ? `<img class="hero" src="${esc(loc.photoUrl)}" alt="${esc(loc.name)}" />` : ""}
       <p><strong>${esc(loc.name)}</strong>, ${esc(loc.neighborhood)}, Atlanta</p>
+      <p>${unverified(loc.address) ? "" : `${esc(loc.address)} · `}<a href="${mapLink(loc)}" target="_blank" rel="noopener">Open in Google Maps</a></p>
       <p>Call time is set for golden hour, <strong>${esc(loc.timing.window)}</strong>. Sunset is at ${esc(loc.timing.sunset)}.</p>
     </section>
     <section>

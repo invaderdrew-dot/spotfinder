@@ -21,23 +21,43 @@ const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static("public"));
 
+const vocabulary = JSON.parse(readFileSync(new URL("./data/vocabulary.json", import.meta.url)));
+const validDate = (d) => (/^\d{4}-\d{2}-\d{2}$/.test(d ?? "") ? d : today());
+
+const topMatches = (profile, date) =>
+  Promise.all(
+    rankLocations(profile, loadLocations()).map(async (loc) => ({
+      ...loc,
+      timing: goldenHour(date, loc.lat, loc.lng),
+      weather: await weather(date, loc.lat, loc.lng),
+    }))
+  );
+
 app.get("/api/health", (_req, res) => res.json({ ok: true, mock: MOCK }));
+app.get("/api/vocabulary", (_req, res) => res.json(vocabulary));
 
 // Step 1: moodboard + date -> aesthetic profile and top 3 spots with timing and weather.
 app.post("/api/plan", upload.array("photos", 3), async (req, res, next) => {
   try {
-    const date = /^\d{4}-\d{2}-\d{2}$/.test(req.body.date ?? "") ? req.body.date : today();
+    const date = validDate(req.body.date);
     if (!req.files?.length && !MOCK) return res.status(400).json({ error: "Upload 1 to 3 photos." });
 
     const profile = await analyzeMoodboard(req.files ?? []);
-    const matches = await Promise.all(
-      rankLocations(profile, loadLocations()).map(async (loc) => ({
-        ...loc,
-        timing: goldenHour(date, loc.lat, loc.lng),
-        weather: await weather(date, loc.lat, loc.lng),
-      }))
-    );
-    res.json({ date, mock: MOCK, profile, matches });
+    res.json({ date, mock: MOCK, profile, matches: await topMatches(profile, date) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Step 1b: the photographer edited the style tags -> re-rank without calling Gemini again.
+app.post("/api/rematch", async (req, res, next) => {
+  try {
+    const { profile, date } = req.body ?? {};
+    if (!profile) return res.status(400).json({ error: "Missing profile." });
+    for (const category of Object.keys(vocabulary).filter((k) => !k.startsWith("_"))) {
+      profile[category] = (profile[category] ?? []).filter((t) => vocabulary[category].includes(t));
+    }
+    res.json({ matches: await topMatches(profile, validDate(date)) });
   } catch (err) {
     next(err);
   }

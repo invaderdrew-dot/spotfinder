@@ -6,6 +6,7 @@ The full flow already works in **mock mode** with no API key. Each teammate swap
 
 ```
 photos + date  ─► POST /api/plan      ─► Gemini tags the look ─► match.js ranks locations ─► top 3 + golden hour + weather
+edit tags      ─► POST /api/rematch   ─► re-rank with the corrected tags (no extra Gemini call)
 pick a spot    ─► POST /api/shotlist  ─► Gemini writes 5 to 8 shots for that spot
 rate + hours   ─► POST /api/proposal  ─► printable proposal (pricing is plain code, never AI)
 ```
@@ -26,7 +27,7 @@ For real AI, get a free key at aistudio.google.com and start with `GEMINI_API_KE
 
 ## How we work
 
-- **Build in Claude Code.** Clone the repo, `cd spotfinder`, run `claude`, and ask for changes to your own files.
+- **Build in Claude Code.** Clone the repo, `cd spotfinder`, run `claude`, and ask for changes to your own files. `CLAUDE.md` tells Claude Code the team rules, so it stays inside your files.
 - **Host on Replit.** Andrew imports this repo into Replit (Create → Import from GitHub), adds `GEMINI_API_KEY` under Secrets, and clicks Run. That Replit app is the official demo.
 - `git pull` before you start. Commit and `git push` when your piece works.
 - **Only edit the files you own.** That keeps merges painless.

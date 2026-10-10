@@ -81,6 +81,12 @@ input { font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px soli
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font-size: 0.8rem; padding: 3px 10px; border-radius: 99px; background: var(--bg); border: 1px solid var(--line); }
 .chip.aesthetic { border-color: var(--accent); }
+.chip button { background: none; color: var(--muted); padding: 0 0 0 6px; border: 0; line-height: 1; }
+.chip button:hover { color: var(--ink); }
+#addTag { font: inherit; font-size: 0.8rem; padding: 3px 8px; border-radius: 99px; border: 1px dashed var(--line); background: none; color: var(--muted); }
+#rematch { margin-top: 4px; }
+a { color: var(--accent); }
+.doc .hero { width: 100%; max-height: 320px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
 .spot { display: flex; flex-direction: column; gap: 4px; padding: 0 0 18px; overflow: hidden; }
 .spot > *:not(.photo) { margin-left: 18px; margin-right: 18px; }
