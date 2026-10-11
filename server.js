@@ -21,7 +21,9 @@ const loadLocations = () => JSON.parse(readFileSync(new URL("./data/locations.js
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
 app.use(express.json({ limit: "1mb" }));
-app.use(express.static("public"));
+// "no-cache" makes browsers check for a newer file on every load, so a pushed redesign shows up
+// right away instead of the old cached page. Unchanged files still come back as a quick 304.
+app.use(express.static("public", { setHeaders: (res) => res.setHeader("Cache-Control", "no-cache") }));
 
 const vocabulary = JSON.parse(readFileSync(new URL("./data/vocabulary.json", import.meta.url)));
 // One line per request in the Console, e.g. "[speed] plan total=4.1s gemini=3.9s", to check the under-60s goal.
