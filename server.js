@@ -94,6 +94,48 @@ app.post("/api/proposal", (req, res) => {
   });
 });
 
+// Pre-demo check for /status.html: is every moving part actually working right now?
+// Runs one tiny real Gemini call, so results are cached for a minute to keep it cheap.
+let statusCache = null;
+// "Gemini 400: {...json...}" -> "Gemini 400: API key not valid..."
+const readable = (msg) => {
+  const inner = msg.match(/"message":\s*"([^"]+)"/)?.[1];
+  return (inner ? `${msg.split(":")[0]}: ${inner}` : msg).slice(0, 160);
+};
+app.get("/api/status", async (_req, res) => {
+  if (statusCache && Date.now() - statusCache.at < 60000) return res.json(statusCache.body);
+  const started = Date.now();
+  const inTwoDays = new Date(Date.now() + 2 * 86400000).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const sample = { name: "Piedmont Park", neighborhood: "Midtown", lightingNotes: "open meadow" };
+  const sampleProfile = { aesthetic: ["natural"], mood: ["serene"], colors: ["earthy"], environment: ["greenery"], summary: "Soft natural portraits." };
+
+  const [gemini, timing] = await Promise.all([
+    MOCK
+      ? { error: new Error("No GEMINI_API_KEY in Secrets, so the app is using mock data") }
+      : guarded("status check", () => planShots(sampleProfile, sample, { window: "6:30 PM – 7:00 PM", sunset: "7:00 PM" }), 20000),
+    planTiming(inTwoDays, 33.7851, -84.3738),
+  ]);
+  const locs = loadLocations();
+  const verified = locs.filter((l) => l.verified === true).length;
+  const photos = locs.filter((l) => l.photoUrl).length;
+  const shots = gemini.value?.shots?.length ?? 0;
+
+  const body = {
+    checkedAt: new Date().toISOString(),
+    seconds: Math.round((Date.now() - started) / 100) / 10,
+    checks: [
+      { name: "Gemini", ok: shots >= 3, detail: gemini.error ? readable(gemini.error.message) : `Live: wrote ${shots} test shots` },
+      { name: "Weather forecast", ok: timing.weather.available, detail: timing.weather.available ? `Open-Meteo reachable (${timing.weather.highF}°F in 2 days)` : "Open-Meteo didn't answer. Spots still show golden hour." },
+      { name: "Locations", ok: locs.length >= 10, detail: `${locs.length} spots (goal 10 to 12)` },
+      { name: "Verified spots", ok: verified === locs.length, detail: `${verified} of ${locs.length} verified` },
+      { name: "Location photos", ok: photos === locs.length, detail: `${photos} of ${locs.length} have photos` },
+      { name: "ElevenLabs voice", ok: NARRATION_ENABLED, optional: true, detail: NARRATION_ENABLED ? "Key set" : "No key, so Listen uses the browser voice (fine)" },
+    ],
+  };
+  statusCache = { at: Date.now(), body };
+  res.json(body);
+});
+
 // Optional: proposal script -> ElevenLabs MP3. 204 means "no key here, use the browser's voice".
 app.post("/api/narrate", async (req, res) => {
   if (!NARRATION_ENABLED) return res.status(204).end();

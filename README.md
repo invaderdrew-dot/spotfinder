@@ -30,6 +30,8 @@ For real AI, get a free key at aistudio.google.com and start with `GEMINI_API_KE
 
 Optional: set `ELEVENLABS_API_KEY` for a realistic voice on the "Listen" button. Without it, the button uses the browser's built-in voice. The script is plain code (no AI), so prices and times are read exactly.
 
+**Before judging:** open `/status.html` on the Replit demo. Every row should be green.
+
 ## How we work
 
 - **Build in Claude Code.** Clone the repo, `cd spotfinder`, run `claude`, and ask for changes to your own files. `CLAUDE.md` tells Claude Code the team rules, so it stays inside your files.
@@ -44,7 +46,7 @@ Optional: set `ELEVENLABS_API_KEY` for a realistic voice on the "Listen" button.
 | OlutiJr: Frontend | `public/index.html`, `public/app.js`, `public/proposal.js`, `public/style.css` | Make the 4 screens feel like a real product | Spot cards and the proposal look demo-ready |
 | Uche (unnakwu1): Dataset + matching | `data/locations.json`, `lib/match.js`, `lib/match.test.js` | Grow to 12 to 15 Atlanta spots with real photos | `npm run test-match` and `npm run check-locations` pass |
 | Frankelly (frankellyfeliz): Gemini | `lib/gemini.js`, `data/vocabulary.json` | Real moodboard analysis and shot lists | 3 real photos come back with sensible tags |
-| Andrew: Backend, timing, reliability | `server.js`, `lib/timing.js`, `lib/reliability.js`, `lib/narrate.js`, `public/share.js`, `public/shrink.js`, `public/narrate.js`, `public/p.html` | Weather-smart timing, shareable proposal links, demo never breaks | No crashes; right golden-hour window picked from the forecast |
+| Andrew: Backend, timing, reliability | `server.js`, `lib/timing.js`, `lib/reliability.js`, `lib/narrate.js`, `scripts/check-locations.js`, `public/share.js`, `public/shrink.js`, `public/narrate.js`, `public/p.html`, `public/status.html` | Weather-smart timing, shareable proposal links, demo never breaks | No crashes; right golden-hour window picked from the forecast |
 
 ## Rules
 
