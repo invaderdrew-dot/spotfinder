@@ -131,7 +131,7 @@ input[type="date"] { color-scheme: light dark; }
 .slot .empty strong { font-weight: 600; font-size: 15px; display: block; }
 
 /* Results: moodboard deck + the look */
-.look-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 32px; align-items: start; }
+.look-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 32px; align-items: center; }
 .deck-col { display: flex; flex-direction: column; gap: 16px; align-items: center; }
 .deck-view { position: relative; width: 100%; overflow: hidden; }
 .deck-track { position: relative; display: flex; gap: 12px; width: max-content; padding: 4px 0 4px calc(50% - min(140px, 35vw)); transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -144,6 +144,12 @@ input[type="date"] { color-scheme: light dark; }
 .deck-dots div { display: flex; gap: 6px; }
 .deck-dots span.d { height: 6px; width: 6px; border-radius: 6px; background: var(--line); transition: width 0.3s; }
 .deck-dots span.d.on { width: 22px; background: var(--ink); }
+.palette { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; border-radius: 22px; background: var(--surface); }
+.swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.swatch span { width: 100%; aspect-ratio: 1; border-radius: 14px; box-shadow: inset 0 0 0 1px var(--line); }
+.swatch small { font-size: 11px; color: var(--muted); letter-spacing: 0.02em; }
+@media (max-width: 400px) { .swatch small { display: none; } }
 .look-col { display: flex; flex-direction: column; gap: 20px; }
 .look-head { display: flex; align-items: center; gap: 12px; }
 .icon-dot { width: 44px; height: 44px; border-radius: 50%; background: var(--pill); color: var(--on-pill); display: flex; align-items: center; justify-content: center; font-size: 18px; flex: 0 0 auto; }
@@ -255,6 +261,8 @@ input[type="date"] { color-scheme: light dark; }
 main:not(.screen) { max-width: 840px; margin: 0 auto; padding: 32px 20px 80px; }
 
 @media (max-width: 600px) {
+  .palette-note { display: none; }
+  .swatch small { font-size: 9.5px; letter-spacing: 0; }
   .topbar { position: static; }
   .nav { order: 3; width: 100%; margin-left: 0; }
   .nav button { padding: 0 12px; }

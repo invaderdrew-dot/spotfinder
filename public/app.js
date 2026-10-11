@@ -6,6 +6,7 @@ import {
 import { shareLink } from "/share.js";
 import { shrinkPhoto } from "/shrink.js";
 import { wireListenButton, stopNarration } from "/narrate.js";
+import { extractPalette } from "/palette.js";
 
 const $ = (sel) => document.querySelector(sel);
 const CATEGORIES = ["aesthetic", "mood", "colors", "environment"];
@@ -183,6 +184,7 @@ $("#planForm").addEventListener("submit", async (e) => {
     form.append("date", $("#date").value);
     state.plan = await api("/api/plan", { method: "POST", body: form });
     state.thumbs = state.urls.filter(Boolean);
+    state.palette = null;
     state.deck = 0;
     state.dirty = false;
     state.open.clear();
@@ -236,13 +238,28 @@ function renderDeck() {
         <div>${thumbs.map((_, i) => `<span class="d ${i === idx ? "on" : ""}"></span>`).join("")}</div>
       </div>
       <button class="circle-btn dark" data-step="1" aria-label="Next reference">${icon("chevron-right")}</button>
-    </div>`;
+    </div>
+    ${state.thumbs?.length ? `<div class="palette" id="palette" aria-live="polite"></div>` : ""}`;
+  renderPalette();
   const go = (i) => {
     state.deck = (i + thumbs.length) % thumbs.length;
     renderDeck();
   };
   $("#deckCol").querySelectorAll("[data-deck]").forEach((c) => c.addEventListener("click", () => go(Number(c.dataset.deck))));
   $("#deckCol").querySelectorAll("[data-step]").forEach((b) => b.addEventListener("click", () => go(idx + Number(b.dataset.step))));
+}
+
+// Color swatches pulled from the moodboard photos. Computed once per moodboard, then reused.
+async function renderPalette() {
+  const el = $("#palette");
+  if (!el) return;
+  state.palette ??= await extractPalette(state.thumbs);
+  if (!state.palette.length || !$("#palette")) return;
+  $("#palette").innerHTML = `
+    <span class="muted small">Moodboard palette <span class="palette-note">· for wardrobe and the edit</span></span>
+    <div class="swatches">${state.palette
+      .map((c) => `<div class="swatch"><span style="background:${c}"></span><small>${c.toUpperCase()}</small></div>`)
+      .join("")}</div>`;
 }
 
 // Style tags are editable so the photographer can correct how Gemini read the moodboard.
