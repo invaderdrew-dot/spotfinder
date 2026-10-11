@@ -7,7 +7,7 @@ import { analyzeMoodboard, planShots, MOCK } from "./lib/gemini.js";
 import { rankLocations } from "./lib/match.js";
 import { planTiming } from "./lib/timing.js";
 import { guarded, LIMITS, fallbackProfile, fallbackShots } from "./lib/reliability.js";
-import { NARRATION_ENABLED, MAX_CHARS, allowNarration, speak } from "./lib/narrate.js";
+import { NARRATION_ENABLED, MAX_CHARS, allowNarration, cachedAudio, speak } from "./lib/narrate.js";
 
 const app = express();
 const upload = multer({
@@ -151,6 +151,9 @@ app.post("/api/narrate", async (req, res) => {
   if (!NARRATION_ENABLED) return res.status(204).end();
   const text = String(req.body?.text ?? "").trim();
   if (!text || text.length > MAX_CHARS) return res.status(400).json({ error: `Narration must be 1 to ${MAX_CHARS} characters.` });
+  // Cached replays are free, so they skip the rate limit.
+  const cached = cachedAudio(text);
+  if (cached) return res.type("audio/mpeg").set("X-Narration-Cache", "hit").send(cached);
   if (!allowNarration(req.ip)) return res.status(429).json({ error: "Too many narrations, try again in a minute." });
   try {
     res.type("audio/mpeg").send(await speak(text));
