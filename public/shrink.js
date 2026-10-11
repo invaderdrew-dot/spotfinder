@@ -1,9 +1,9 @@
 // Owner: Andrew (backend + reliability)
 // Shrinks photos in the browser before upload: faster requests, and phone photos stay under the 8 MB limit.
-// Gemini only needs enough detail to read the style, so 1600px on the long side is plenty.
+// Gemini only needs enough detail to read the style, so 1024px on the long side is plenty and keeps Gemini fast.
 
-const MAX_SIDE = 1600;
-const QUALITY = 0.85;
+const MAX_SIDE = 1024;
+const QUALITY = 0.8;
 
 export async function shrinkPhoto(file) {
   try {
