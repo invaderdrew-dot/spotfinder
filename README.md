@@ -43,7 +43,7 @@ Optional: set `ELEVENLABS_API_KEY` for a realistic voice on the "Listen" button.
 
 | Person | Files | Goal | Done when |
 |---|---|---|---|
-| OlutiJr: Frontend | `public/index.html`, `public/app.js`, `public/proposal.js`, `public/style.css` | Make the 4 screens feel like a real product | Spot cards and the proposal look demo-ready |
+| Andrew (covering for OlutiJr): Frontend | `public/index.html`, `public/app.js`, `public/proposal.js`, `public/style.css` | Make the 4 screens feel like a real product | Spot cards and the proposal look demo-ready |
 | Uche (unnakwu1): Dataset + matching | `data/locations.json`, `lib/match.js`, `lib/match.test.js` | Grow to 12 to 15 Atlanta spots with real photos | `npm run test-match` and `npm run check-locations` pass |
 | Frankelly (frankellyfeliz): Gemini | `lib/gemini.js`, `data/vocabulary.json` | Real moodboard analysis and shot lists | 3 real photos come back with sensible tags |
 | Andrew: Backend, timing, reliability | `server.js`, `lib/timing.js`, `lib/reliability.js`, `lib/narrate.js`, `scripts/check-locations.js`, `public/share.js`, `public/shrink.js`, `public/narrate.js`, `public/p.html`, `public/status.html` | Weather-smart timing, shareable proposal links, demo never breaks | No crashes; right golden-hour window picked from the forecast |

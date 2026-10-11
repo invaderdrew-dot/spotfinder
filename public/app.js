@@ -1,4 +1,4 @@
-// Owner: Teammate 1 (frontend)
+// Owner: Teammate 1 (frontend). Covered by Andrew while OlutiJr is out.
 import { esc, prettyDate, mapLink, unverified, proposalHTML } from "/proposal.js";
 import { shareLink } from "/share.js";
 import { shrinkPhoto } from "/shrink.js";
@@ -89,6 +89,8 @@ $("#planForm").addEventListener("submit", async (e) => {
     for (const f of await Promise.all(state.files.map(shrinkPhoto))) form.append("photos", f);
     form.append("date", $("#date").value);
     state.plan = await api("/api/plan", { method: "POST", body: form });
+    (state.thumbs ?? []).forEach((u) => URL.revokeObjectURL(u));
+    state.thumbs = state.files.map((f) => URL.createObjectURL(f));
     $("#mockBadge").hidden = !state.plan.mock;
     setNotice($("#planNotice"), state.plan.notice);
     renderResults();
@@ -127,14 +129,18 @@ function renderProfile(dirty) {
             .join("")}</optgroup>`
       ).join("")
     : "";
+  const board = (state.thumbs ?? []).map((u, i) => `<img src="${u}" alt="Inspiration photo ${i + 1}" />`).join("");
   $("#profile").innerHTML = `
-    <h3>The look</h3>
-    <p>${esc(profile.summary)}</p>
+    ${board ? `<div class="moodboard" aria-label="Client moodboard">${board}</div><div class="arrow" aria-hidden="true">→</div>` : ""}
+    <div class="look">
+    <p class="eyebrow">The look we read</p>
+    <p class="summary">${esc(profile.summary)}</p>
     <div class="chips">${chips}
       ${options ? `<select id="addTag" aria-label="Add a style tag"><option value="">+ Add tag</option>${options}</select>` : ""}
     </div>
     <p class="muted small">Not quite right? Remove or add tags, then update the spots.</p>
-    ${dirty ? `<button class="primary" id="rematch">Update spots</button>` : ""}`;
+    ${dirty ? `<button class="primary" id="rematch">Update spots</button>` : ""}
+    </div>`;
 
   $("#profile").querySelectorAll("[data-remove]").forEach((b) =>
     b.addEventListener("click", () => {
@@ -174,26 +180,39 @@ function renderMatches() {
   $("#matches").innerHTML = matches
     .map((m, i) => {
       const wx = m.weather.available
-        ? `${m.weather.highF}°F high${m.weather.rainChance != null ? ` · ${m.weather.rainChance}% rain` : ""}`
-        : esc(m.weather.note);
+        ? `${m.weather.highF}°F${m.weather.rainChance != null ? ` · ${m.weather.rainChance}% rain` : ""}`
+        : "Forecast not out yet";
+      // Until a real photo exists, a color wash keyed to the spot's vibe looks intentional, not missing.
+      const env = m.environment?.[0] ?? "urban";
       const photo = m.photoUrl
         ? `<img src="${esc(m.photoUrl)}" alt="${esc(m.name)}" />`
-        : `<div class="placeholder">${esc(m.name)}</div>`;
+        : `<div class="placeholder"><small>Photo coming soon</small><span>${esc((m.environment ?? []).slice(0, 2).join(" · ").replace(/-/g, " "))}</span></div>`;
+      const matched = (m.matchedTags ?? []).slice(0, 5).map((t) => `<span class="chip hit">${esc(t)}</span>`).join("");
+      const notes = [m.timing.reason, m.lightingNotes, m.accessNotes]
+        .filter(Boolean)
+        .map((n) => `<p>${esc(String(n).replace(/^VERIFY:\s*/, ""))}</p>`)
+        .join("");
       return `
-      <article class="spot card">
-        <div class="photo">${photo}<span class="score">${Math.round(m.score * 100)}% match</span></div>
-        <h3>${esc(m.name)}</h3>
-        <p class="muted">${esc(m.neighborhood)}${unverified(m.address) ? "" : ` · ${esc(m.address)}`} · <a href="${mapLink(m)}" target="_blank" rel="noopener">Map</a></p>
-        <p>${esc(m.why)}</p>
-        <dl>
-          <dt>Best light</dt><dd>${esc(m.timing.window)} <span class="muted small">(${esc(m.timing.pick)})</span></dd>
-          <dt>Weather</dt><dd>${wx}</dd>
-          <dt>Access</dt><dd>${esc(m.accessNotes.replace(/^VERIFY:\s*/, ""))}</dd>
-        </dl>
-        <p class="small">${esc(m.timing.reason)}</p>
-        ${m.timing.warning ? `<p class="warn small">⚠ ${esc(m.timing.warning)}</p>` : ""}
-        ${m.verified ? "" : `<p class="unverified">Details not checked yet</p>`}
-        <button class="primary" data-pick="${i}">Plan this spot</button>
+      <article class="spot card${i === 0 ? " best" : ""}" style="--i:${i}">
+        <div class="photo env-${esc(env)}">
+          ${photo}
+          <span class="rank">${i === 0 ? "Best match" : `#${i + 1}`}</span>
+          <span class="score">${Math.round(m.score * 100)}% match</span>
+        </div>
+        <div class="body">
+          <h3>${esc(m.name)}</h3>
+          <p class="where">${esc(m.neighborhood)}${unverified(m.address) ? "" : ` · ${esc(m.address)}`} · <a href="${mapLink(m)}" target="_blank" rel="noopener">Map ↗</a></p>
+          <p class="why">${esc(m.why)}</p>
+          ${matched ? `<div class="chips">${matched}</div>` : ""}
+          <div class="facts">
+            <div><span class="label">Best light</span><strong>${esc(m.timing.window)}</strong><span class="muted small">${esc(m.timing.label ?? "")}</span></div>
+            <div><span class="label">Weather</span><strong>${esc(wx)}</strong></div>
+          </div>
+          ${m.timing.warning ? `<p class="warn small">⚠ ${esc(m.timing.warning)}</p>` : ""}
+          <details class="more"><summary>Lighting & access notes</summary>${notes}</details>
+          ${m.verified ? "" : `<p class="unverified">Location details not checked yet</p>`}
+          <button class="primary" data-pick="${i}">Plan this spot</button>
+        </div>
       </article>`;
     })
     .join("");
