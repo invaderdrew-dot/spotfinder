@@ -180,8 +180,8 @@ $("#planForm").addEventListener("submit", async (e) => {
   const progress = startProgress({
     title: "Reading the moodboard",
     images: state.urls.filter(Boolean),
-    steps: ["Reading the look with Gemini", "Matching Atlanta spots", "Checking golden hour and weather"],
-    slowNote: "Google's AI is busy right now. Still working, this can take up to 40 seconds.",
+    steps: ["Reading the look", "Matching Atlanta spots", "Checking golden hour and weather"],
+    slowNote: "The AI is busy right now. Still working, this can take up to 40 seconds.",
   });
   try {
     const form = new FormData();
@@ -220,20 +220,20 @@ function renderResults() {
   renderMatches();
 }
 
-// The client's moodboard as a deck of cards with previous/next.
+// The client's moodboard as a deck: the current photo sits in the spotlight, its neighbors peek in
+// at the sides. Built once per moodboard; switching only moves the track, so the slide animates.
 function renderDeck() {
   const thumbs = state.thumbs?.length ? state.thumbs : [null, null, null];
-  const idx = Math.min(state.deck, thumbs.length - 1);
   const client = $("#clientNameStart").value.trim();
   $("#deckCol").innerHTML = `
-    <div class="deck-view">
-      <div class="deck-track" style="transform:translateX(calc(${-idx} * (var(--deck-card) + 12px)))">
+    <div class="deck-view" tabindex="0" aria-label="Client moodboard, use left and right arrows to browse">
+      <div class="deck-track">
         ${thumbs
           .map(
             (u, i) =>
-              `<div class="deck-card ${i === idx ? "on" : ""} ${u ? "" : "stripes"}" data-deck="${i}" ${
+              `<div class="deck-card ${u ? "" : "stripes"}" data-deck="${i}" ${
                 u ? `style="background-image:url('${u}')"` : ""
-              } role="img" aria-label="Reference photo ${i + 1}"></div>`
+              } role="img" aria-label="Reference photo ${i + 1} of ${thumbs.length}"></div>`
           )
           .join("")}
       </div>
@@ -242,16 +242,45 @@ function renderDeck() {
       <button class="circle-btn" data-step="-1" aria-label="Previous reference">${icon("chevron-left")}</button>
       <div class="deck-dots">
         <span class="muted small">${client ? `${esc(client)}'s moodboard` : "Client moodboard"}</span>
-        <div>${thumbs.map((_, i) => `<span class="d ${i === idx ? "on" : ""}"></span>`).join("")}</div>
+        <div>${thumbs.map(() => `<span class="d"></span>`).join("")}</div>
       </div>
       <button class="circle-btn dark" data-step="1" aria-label="Next reference">${icon("chevron-right")}</button>
     </div>`;
+
+  const view = $("#deckCol .deck-view");
+  const track = $("#deckCol .deck-track");
+  const cards = [...track.children];
+  const dots = [...$("#deckCol .deck-dots div").children];
+  const [prev, next] = $("#deckCol").querySelectorAll("[data-step]");
   const go = (i) => {
-    state.deck = (i + thumbs.length) % thumbs.length;
-    renderDeck();
+    state.deck = Math.max(0, Math.min(thumbs.length - 1, i));
+    track.style.transform = `translateX(calc(${-state.deck} * (var(--deck-card) + 12px)))`;
+    cards.forEach((c, j) => c.classList.toggle("on", j === state.deck));
+    dots.forEach((d, j) => d.classList.toggle("on", j === state.deck));
+    prev.disabled = state.deck === 0;
+    next.disabled = state.deck === thumbs.length - 1;
   };
-  $("#deckCol").querySelectorAll("[data-deck]").forEach((c) => c.addEventListener("click", () => go(Number(c.dataset.deck))));
-  $("#deckCol").querySelectorAll("[data-step]").forEach((b) => b.addEventListener("click", () => go(idx + Number(b.dataset.step))));
+
+  // Swipe or drag more than 40px to move one photo; a click right after a swipe is ignored.
+  let startX = null;
+  let swipedAt = 0;
+  view.addEventListener("pointerdown", (e) => (startX = e.clientX));
+  view.addEventListener("pointerup", (e) => {
+    const dx = e.clientX - (startX ?? e.clientX);
+    startX = null;
+    if (Math.abs(dx) > 40) {
+      swipedAt = Date.now();
+      go(state.deck + (dx < 0 ? 1 : -1));
+    }
+  });
+  view.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") go(state.deck + 1);
+    if (e.key === "ArrowLeft") go(state.deck - 1);
+  });
+  cards.forEach((c, i) => c.addEventListener("click", () => Date.now() - swipedAt > 300 && go(i)));
+  prev.addEventListener("click", () => go(state.deck - 1));
+  next.addEventListener("click", () => go(state.deck + 1));
+  go(state.deck);
 }
 
 // Style tags are editable so the photographer can correct how Gemini read the moodboard.
@@ -404,8 +433,8 @@ async function pickSpot(location, button) {
   const progress = startProgress({
     title: `Planning ${location.name}`,
     images: [safePhoto(location.photoUrl)].filter(Boolean),
-    steps: ["Writing the shot list with Gemini", "Lining shots up with the light"],
-    slowNote: "Google's AI is busy right now. Still working, this can take up to 30 seconds.",
+    steps: ["Writing the shot list", "Lining shots up with the light"],
+    slowNote: "The AI is busy right now. Still working, this can take up to 30 seconds.",
   });
   try {
     state.location = location;

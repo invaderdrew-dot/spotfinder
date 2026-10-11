@@ -135,7 +135,10 @@ input[type="date"] { color-scheme: light dark; }
 .deck-col { --deck-card: min(340px, 72vw); display: flex; flex-direction: column; gap: 16px; align-items: center; }
 .deck-view { position: relative; width: 100%; overflow: hidden; }
 .deck-track { position: relative; display: flex; gap: 12px; width: max-content; padding: 4px 0 4px calc(50% - var(--deck-card) / 2); transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.deck-card { flex: 0 0 var(--deck-card); aspect-ratio: 4 / 5; border-radius: 22px; overflow: hidden; cursor: pointer; background: var(--ph-a) center / cover no-repeat; transition: opacity 0.3s, transform 0.3s; opacity: 0.5; transform: scale(0.92); }
+.deck-card { flex: 0 0 var(--deck-card); aspect-ratio: 4 / 5; border-radius: 22px; overflow: hidden; cursor: pointer; background: var(--ph-a) center / cover no-repeat; transition: opacity 0.35s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); opacity: 0.5; transform: scale(0.92); }
+.deck-view { touch-action: pan-y; user-select: none; outline: none; }
+.deck-view:focus-visible { outline: 2px solid var(--mustard); outline-offset: 4px; border-radius: 22px; }
+.deck-nav .circle-btn:disabled { opacity: 0.35; cursor: default; }
 .deck-card.on { opacity: 1; transform: none; }
 .deck-nav { display: flex; align-items: center; gap: 16px; }
 .deck-nav .circle-btn { width: 44px; height: 44px; align-self: center; }
