@@ -4,86 +4,100 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Spot Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Young+Serif&display=swap" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.460.0/font/lucide.css" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <!-- Owner: Teammate 1 (frontend) -->
-  <header class="topbar">
-    <div class="brand">Spot Finder <span class="city">ATL</span></div>
-    <ol class="steps" id="steps">
-      <li data-step="upload">Moodboard</li>
-      <li data-step="results">Spots</li>
-      <li data-step="shots">Shot list</li>
-      <li data-step="proposal">Proposal</li>
-    </ol>
-    <span class="badge" id="mockBadge" hidden>Mock data</span>
+  <!-- Owner: Teammate 1 (frontend). Covered by Andrew while OlutiJr is out. Design from Claude Design "Spot Finder v2". -->
+  <header class="topbar no-print">
+    <div class="topbar-inner">
+      <span class="brand">Spot Finder</span>
+      <span class="badge" id="mockBadge" hidden>Mock data</span>
+      <nav class="nav" id="nav" aria-label="Steps">
+        <button data-nav="upload"><i class="icon-image-plus"></i>New shoot</button>
+        <button data-nav="results"><i class="icon-images"></i>Results</button>
+        <button data-nav="shots"><i class="icon-list-ordered"></i>Shot list</button>
+        <button data-nav="proposal"><i class="icon-file-text"></i>Proposal</button>
+      </nav>
+      <button class="circle-btn" id="themeBtn" aria-label="Switch theme"><i class="icon-sun-moon"></i></button>
+    </div>
   </header>
 
-  <main>
-    <!-- 1. Moodboard -->
-    <section id="upload" class="screen">
-      <h1>Turn a moodboard into a shoot plan.</h1>
-      <p class="lede">Add up to 3 of your client's inspiration photos. Spot Finder reads the look, picks Atlanta locations that match it, and drafts a proposal.</p>
-      <form id="planForm" class="card">
-        <label class="drop" id="drop">
-          <input type="file" id="photos" name="photos" accept="image/*" multiple />
-          <span>Drop photos here or <u>browse</u></span>
-          <small>JPG or PNG, up to 3 photos, 8 MB each</small>
-        </label>
-        <div class="thumbs" id="thumbs"></div>
-        <label class="field">Shoot date
-          <input type="date" id="date" name="date" required />
-        </label>
-        <button class="primary" type="submit" id="planBtn">Find spots</button>
-      </form>
-    </section>
-
-    <!-- 2. Matches -->
-    <section id="results" class="screen" hidden>
-      <p class="notice" id="planNotice" hidden></p>
-      <div class="profile card" id="profile"></div>
-      <h2>Top spots for <span id="resultsDate"></span></h2>
-      <div class="grid" id="matches"></div>
-      <button class="ghost" data-go="upload">← New moodboard</button>
-    </section>
-
-    <!-- 3. Shot list -->
-    <section id="shots" class="screen" hidden>
-      <h2 id="shotsTitle"></h2>
-      <p class="muted" id="shotsTiming"></p>
-      <p class="notice" id="shotsNotice" hidden></p>
-      <ol class="shotlist" id="shotList"></ol>
-      <p class="tips" id="shotTips"></p>
-      <form id="proposalForm" class="card">
-        <h3>Proposal details</h3>
-        <div class="row">
-          <label class="field">Client name <input name="clientName" placeholder="Jordan Lee" /></label>
-          <label class="field">Your name <input name="photographerName" placeholder="Your studio" /></label>
-        </div>
-        <div class="row">
-          <label class="field">Hourly rate ($) <input name="rate" type="number" min="0" step="1" required /></label>
-          <label class="field">Hours <input name="hours" type="number" min="0.5" step="0.5" value="2" required /></label>
-        </div>
-        <p class="muted small">You set the price. AI never sets it.</p>
-        <button class="primary" type="submit">Create proposal</button>
-      </form>
-      <button class="ghost" data-go="results">← Back to spots</button>
-    </section>
-
-    <!-- 4. Proposal -->
-    <section id="proposal" class="screen" hidden>
-      <article class="doc" id="doc"></article>
-      <div class="actions no-print">
-        <button class="ghost" data-go="shots">← Edit</button>
-        <span class="muted small" id="shareStatus"></span>
-        <button class="ghost-btn" id="listenBtn">▶ Listen</button>
-        <button class="ghost-btn" id="shareBtn">Copy client link</button>
-        <button class="primary" onclick="window.print()">Print or save PDF</button>
+  <!-- 1. New shoot -->
+  <main id="upload" class="screen mid">
+    <div class="intro">
+      <h1>New shoot</h1>
+      <p class="muted">Add 2–3 inspiration photos from your client. We'll read the look and find matching spots in Atlanta.</p>
+    </div>
+    <form id="planForm" class="stack-32">
+      <div class="field-grid">
+        <label class="field"><span>Client name</span><input id="clientNameStart" placeholder="e.g. Priya Shah" autocomplete="off" /></label>
+        <label class="field"><span>Shoot date</span><input type="date" id="date" required /></label>
       </div>
-    </section>
-
-    <p class="error" id="error" hidden></p>
+      <div class="stack-12">
+        <div class="row-between"><span class="muted small">Client moodboard</span><span class="muted small" id="photoCount">0 of 3 added</span></div>
+        <div class="slots" id="slots"></div>
+      </div>
+      <div class="row-wrap">
+        <button class="pill" type="submit" id="planBtn"><span class="label">Find spots</span><span class="dot"><i class="icon-search"></i></span></button>
+        <span class="muted small" id="uploadHint">Add 2–3 photos to start</span>
+      </div>
+    </form>
   </main>
+
+  <!-- 2. Results -->
+  <main id="results" class="screen wide" hidden>
+    <p class="notice" id="planNotice" hidden></p>
+    <section class="look-grid">
+      <div class="deck-col" id="deckCol"></div>
+      <div class="look-col" id="profile"></div>
+    </section>
+    <section class="stack-20">
+      <div class="section-head">
+        <h1>Best fits for this shoot</h1>
+        <span class="muted small" id="resultsMeta"></span>
+      </div>
+      <div class="cards" id="matches"></div>
+    </section>
+  </main>
+
+  <!-- 3. Shot list -->
+  <main id="shots" class="screen narrow" hidden>
+    <button class="circle-btn" data-go="results" aria-label="Back to results"><i class="icon-arrow-left"></i></button>
+    <p class="notice" id="shotsNotice" hidden></p>
+    <section class="panel" id="chosenSpot"></section>
+    <section class="stack-12">
+      <div class="row-between baseline"><h2>Shot list</h2><span class="muted small" id="shotCount"></span></div>
+      <ol class="shot-list" id="shotList"></ol>
+      <p class="muted small" id="shotTips"></p>
+    </section>
+    <form class="panel stack-20" id="proposalForm">
+      <h2>Proposal details</h2>
+      <div class="field-grid four">
+        <label class="field"><span>Client name</span><input name="clientName" placeholder="e.g. Priya Shah" class="on-bg" /></label>
+        <label class="field"><span>Your name</span><input name="photographerName" placeholder="e.g. Dana Reyes" class="on-bg" /></label>
+        <label class="field"><span>Hourly rate ($)</span><input name="rate" type="number" min="0" step="5" required class="on-bg" /></label>
+        <label class="field"><span>Hours</span><input name="hours" type="number" min="0.5" step="0.5" value="2" required class="on-bg" /></label>
+      </div>
+      <div class="row-between wrap top-line">
+        <div class="stack-2"><span class="muted small" id="totalLabel">Enter a rate</span><span class="big-total mid" id="totalLive">$0</span></div>
+        <button class="pill" type="submit"><span class="label">Create proposal</span><span class="dot"><i class="icon-file-text"></i></span></button>
+      </div>
+      <p class="muted small">You set the price. AI never sets it.</p>
+    </form>
+  </main>
+
+  <!-- 4. Proposal -->
+  <main id="proposal" class="screen narrow" hidden>
+    <button class="circle-btn no-print" data-go="shots" aria-label="Back to shot list"><i class="icon-arrow-left"></i></button>
+    <article class="doc" id="doc"></article>
+  </main>
+
+  <p class="error" id="error" hidden></p>
+  <div class="toast no-print" id="toast" hidden></div>
 
   <script src="/app.js" type="module"></script>
 </body>

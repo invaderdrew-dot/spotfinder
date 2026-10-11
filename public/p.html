@@ -5,40 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="referrer" content="no-referrer" />
   <title>Shoot proposal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Young+Serif&display=swap" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.460.0/font/lucide.css" />
   <link rel="stylesheet" href="/style.css" />
 </head>
-<body class="shared">
+<body>
   <!-- Owner: Andrew. The client-facing page a share link opens. -->
-  <main>
-    <article class="doc" id="doc"><p>Opening proposal…</p></article>
-    <div class="actions no-print">
-      <p class="muted small">This proposal lives only in its link. Nothing is stored on a server.</p>
-      <button class="ghost-btn" id="listenBtn">▶ Listen to this proposal</button>
-      <button class="primary" onclick="window.print()">Print or save PDF</button>
-    </div>
+  <header class="topbar no-print"><div class="topbar-inner"><span class="brand">Spot Finder</span></div></header>
+  <main class="screen narrow">
+    <article class="doc" id="doc"><p class="doc-body">Opening proposal…</p></article>
+    <p class="muted small no-print" id="privacy">This proposal lives only in its link. Nothing is stored on a server.</p>
   </main>
   <script type="module">
     import { readShareLink } from "/share.js";
-    import { proposalHTML } from "/proposal.js";
+    import { proposalHTML, icon } from "/proposal.js";
     import { wireListenButton, stopNarration } from "/narrate.js";
 
-    let current = null;
-    wireListenButton(document.getElementById("listenBtn"), () => current);
+    const ACTIONS = `
+      <button class="pill" id="listenBtn"><span class="label">Listen to this proposal</span><span class="dot">${icon("play")}</span></button>
+      <button class="pill outline" id="printBtn"><span class="label">Print / PDF</span><span class="dot">${icon("printer")}</span></button>`;
 
     async function render() {
+      stopNarration();
       const p = await readShareLink(location.hash);
       const doc = document.getElementById("doc");
-      const actions = document.querySelector(".actions");
-      stopNarration();
       if (!p) {
-        doc.innerHTML = "<h1>This link doesn't work</h1><p>It may have been cut off when it was copied. Ask your photographer to send it again.</p>";
-        actions.style.display = "none";
+        doc.innerHTML = `<div class="doc-body"><h1>This link doesn't work</h1><p class="muted">It may have been cut off when it was copied. Ask your photographer to send it again.</p></div>`;
+        document.getElementById("privacy").hidden = true;
         return;
       }
-      actions.style.display = "";
+      document.getElementById("privacy").hidden = false;
       document.title = `Shoot proposal · ${p.clientName || "Client"}`;
-      current = p;
-      doc.innerHTML = proposalHTML(p);
+      doc.innerHTML = proposalHTML(p, { actions: ACTIONS });
+      wireListenButton(document.getElementById("listenBtn"), () => p);
+      document.getElementById("printBtn").addEventListener("click", () => window.print());
     }
     render();
     window.addEventListener("hashchange", render);

@@ -89,10 +89,18 @@ export async function playNarration(p, onEnd = () => {}) {
 }
 
 // Turns a button into a Listen / Stop toggle for whatever proposal getProposal() returns.
+// Updates the button's .label and icon (if it has them) so pill buttons keep their layout.
 export function wireListenButton(button, getProposal) {
-  const idle = button.textContent;
+  const label = button.querySelector(".label") ?? button;
+  const iconEl = button.querySelector(".dot i");
+  const idle = label.textContent;
+  const idleIcon = iconEl?.className;
+  const set = (text, icon) => {
+    label.textContent = text;
+    if (iconEl && icon) iconEl.className = icon;
+  };
   const reset = () => {
-    button.textContent = idle;
+    set(idle, idleIcon);
     button.disabled = false;
     button.dataset.playing = "";
   };
@@ -102,15 +110,15 @@ export function wireListenButton(button, getProposal) {
       return reset();
     }
     button.disabled = true;
-    button.textContent = "Loading voice…";
+    set("Loading voice…", "icon-loader-circle spin");
     try {
       await playNarration(getProposal(), reset);
       button.dataset.playing = "1";
-      button.textContent = "■ Stop";
+      set("Stop", "icon-square");
       button.disabled = false;
     } catch {
       reset();
-      button.textContent = "Audio not supported here";
+      set("Audio not supported here");
     }
   });
 }

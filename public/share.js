@@ -12,7 +12,10 @@ function toShareable(p) {
     clientName: p.clientName,
     photographerName: p.photographerName,
     date: p.date,
-    profile: { summary: p.profile?.summary },
+    profile: {
+      summary: p.profile?.summary,
+      tags: ["aesthetic", "mood", "colors", "environment"].flatMap((k) => p.profile?.[k] ?? []).slice(0, 8),
+    },
     location: {
       name: loc.name,
       neighborhood: loc.neighborhood,
@@ -20,9 +23,10 @@ function toShareable(p) {
       lat: loc.lat,
       lng: loc.lng,
       photoUrl: loc.photoUrl,
-      timing: { label: t.label, window: t.window, reason: t.reason, warning: t.warning },
+      weather: loc.weather,
+      timing: { label: t.label, window: t.window, startMin: t.startMin, endMin: t.endMin, reason: t.reason, warning: t.warning },
     },
-    shots: (p.shots ?? []).map(({ title, direction }) => ({ title, direction })),
+    shots: (p.shots ?? []).map(({ title, direction, when }) => ({ title, direction, when })),
     pricing: { rate: p.pricing?.rate, hours: p.pricing?.hours },
   };
 }
