@@ -8,7 +8,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test-match": "node lib/match.test.js",
-    "check-locations": "node scripts/check-locations.js"
+    "check-locations": "node scripts/check-locations.js",
+    "eval-match": "node scripts/eval-match.js"
   },
   "dependencies": {
     "express": "^4.21.2",
