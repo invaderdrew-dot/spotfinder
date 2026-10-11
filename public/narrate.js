@@ -31,6 +31,28 @@ export function narrationScript(p) {
 
 let audio = null;
 
+// Browsers default to their most robotic voice. Prefer the natural-sounding ones most Macs, Chrome and Edge ship.
+const PREFERRED = [/natural/i, /premium/i, /enhanced/i, /^Google US English$/, /^Samantha/, /^Ava/, /^Allison/, /^Aria/, /^Jenny/, /Google/];
+
+async function bestVoice() {
+  let voices = speechSynthesis.getVoices();
+  // Chrome loads its voice list a moment after the page.
+  if (!voices.length) {
+    await new Promise((r) => {
+      speechSynthesis.addEventListener("voiceschanged", r, { once: true });
+      setTimeout(r, 1000);
+    });
+    voices = speechSynthesis.getVoices();
+  }
+  const english = voices.filter((v) => /^en[-_]US/i.test(v.lang));
+  const pool = english.length ? english : voices.filter((v) => /^en/i.test(v.lang));
+  for (const pattern of PREFERRED) {
+    const match = pool.find((v) => pattern.test(v.name));
+    if (match) return match;
+  }
+  return pool[0] ?? null;
+}
+
 export function stopNarration() {
   audio?.pause();
   audio = null;
@@ -59,6 +81,7 @@ export async function playNarration(p, onEnd = () => {}) {
   }
   if (!("speechSynthesis" in window)) throw new Error("This browser can't read aloud.");
   const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = await bestVoice();
   utterance.rate = 1.0;
   utterance.onend = onEnd;
   speechSynthesis.speak(utterance);
