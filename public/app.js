@@ -6,6 +6,7 @@ import {
 import { shareLink } from "/share.js";
 import { shrinkPhoto } from "/shrink.js";
 import { wireListenButton, stopNarration } from "/narrate.js";
+import { startProgress } from "/progress.js";
 
 const $ = (sel) => document.querySelector(sel);
 const CATEGORIES = ["aesthetic", "mood", "colors", "environment"];
@@ -176,12 +177,19 @@ $("#planForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   setError("");
   const done = busy($("#planBtn"), "Reading the look…");
+  const progress = startProgress({
+    title: "Reading the moodboard",
+    images: state.urls.filter(Boolean),
+    steps: ["Reading the look with Gemini", "Matching Atlanta spots", "Checking golden hour and weather"],
+    slowNote: "Google's AI is busy right now. Still working, this can take up to 40 seconds.",
+  });
   try {
     const form = new FormData();
     const files = state.photos.filter(Boolean);
     for (const f of await Promise.all(files.map(shrinkPhoto))) form.append("photos", f);
     form.append("date", $("#date").value);
     state.plan = await api("/api/plan", { method: "POST", body: form });
+    await progress.finish();
     state.thumbs = state.urls.filter(Boolean);
     state.deck = 0;
     state.dirty = false;
@@ -195,6 +203,7 @@ $("#planForm").addEventListener("submit", async (e) => {
     renderResults();
     show("results");
   } catch (err) {
+    await progress.fail();
     setError(err.message);
   } finally {
     done();
@@ -392,6 +401,12 @@ const GOLDEN = /golden|sunset|sunrise|window|last light|low sun/i;
 async function pickSpot(location, button) {
   setError("");
   const done = busy(button, "Writing shot list…");
+  const progress = startProgress({
+    title: `Planning ${location.name}`,
+    images: [safePhoto(location.photoUrl)].filter(Boolean),
+    steps: ["Writing the shot list with Gemini", "Lining shots up with the light"],
+    slowNote: "Google's AI is busy right now. Still working, this can take up to 30 seconds.",
+  });
   try {
     state.location = location;
     state.shots = await api("/api/shotlist", {
@@ -399,10 +414,12 @@ async function pickSpot(location, button) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ profile: state.plan.profile, location }),
     });
+    await progress.finish();
     state.proposal = null;
     renderShots();
     show("shots");
   } catch (err) {
+    await progress.fail();
     setError(err.message);
   } finally {
     done();
