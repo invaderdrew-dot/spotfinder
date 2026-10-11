@@ -3,7 +3,7 @@
     "id": "atl-001",
     "name": "Krog Street Tunnel",
     "neighborhood": "Cabbagetown",
-    "address": "VERIFY: street address",
+    "address": "Krog St NE at Wylie St SE, Atlanta, GA 30307",
     "aesthetic": [
       "streetwear",
       "edgy"
@@ -20,18 +20,18 @@
       "urban",
       "industrial"
     ],
-    "lightingNotes": "VERIFY: shaded inside; the cleanest light is at the two openings.",
-    "accessNotes": "VERIFY: public underpass with car and foot traffic. Bring a spotter.",
-    "photoUrl": "",
+    "lightingNotes": "shaded inside; the cleanest light is at the two openings.",
+    "accessNotes": "Public underpass with car and foot traffic. Bring a spotter.",
+    "photoUrl": "/locations/atl-001.jpg",
     "lat": 33.7536,
     "lng": -84.3641,
-    "verified": false
+    "verified": true
   },
   {
     "id": "atl-002",
     "name": "Jackson Street Bridge",
     "neighborhood": "Old Fourth Ward",
-    "address": "VERIFY: street address",
+    "address": "Jackson St NE at Irwin St NE, Atlanta, GA 30312",
     "aesthetic": [
       "editorial",
       "casual"
@@ -47,18 +47,18 @@
       "skyline",
       "urban"
     ],
-    "lightingNotes": "VERIFY: skyline faces west, so sunset backlights the city.",
-    "accessNotes": "VERIFY: narrow public sidewalk that gets crowded at sunset.",
-    "photoUrl": "",
+    "lightingNotes": "skyline faces west, so sunset backlights the city.",
+    "accessNotes": "Narrow public sidewalk that gets crowded at sunset.",
+    "photoUrl": "/locations/atl-002.jpg",
     "lat": 33.7593,
     "lng": -84.3729,
-    "verified": false
+    "verified": true
   },
   {
     "id": "atl-003",
     "name": "Historic Fourth Ward Park",
     "neighborhood": "Old Fourth Ward",
-    "address": "VERIFY: street address",
+    "address": "680 Dallas St NE, Atlanta, GA 30308",
     "aesthetic": [
       "romantic",
       "natural"
@@ -76,18 +76,18 @@
       "greenery",
       "water"
     ],
-    "lightingNotes": "VERIFY: pond and lawn give soft, even light in the evening.",
-    "accessNotes": "VERIFY: city park. Check whether paid shoots need a permit.",
-    "photoUrl": "",
+    "lightingNotes": "pond and lawn give soft, even light in the evening.",
+    "accessNotes": "City park. Check whether paid shoots need a permit.",
+    "photoUrl": "/locations/atl-003.jpg",
     "lat": 33.7631,
     "lng": -84.3626,
-    "verified": false
+    "verified": true
   },
   {
     "id": "atl-004",
     "name": "Piedmont Park",
     "neighborhood": "Midtown",
-    "address": "VERIFY: street address",
+    "address": "400 Park Dr NE, Atlanta, GA 30306",
     "aesthetic": [
       "romantic",
       "natural",
@@ -106,18 +106,18 @@
       "skyline",
       "water"
     ],
-    "lightingNotes": "VERIFY: open meadow with a skyline view; little shade at midday.",
-    "accessNotes": "VERIFY: Piedmont Park Conservancy has rules for commercial photography.",
-    "photoUrl": "",
+    "lightingNotes": "open meadow with a skyline view; little shade at midday.",
+    "accessNotes": "Piedmont Park Conservancy has rules for commercial photography.",
+    "photoUrl": "/locations/atl-004.jpg",
     "lat": 33.7851,
     "lng": -84.3738,
-    "verified": false
+    "verified": true
   },
   {
     "id": "atl-005",
     "name": "Ponce City Market (exterior)",
     "neighborhood": "Old Fourth Ward",
-    "address": "VERIFY: street address",
+    "address": "675 Ponce de Leon Ave NE, Atlanta, GA 30308",
     "aesthetic": [
       "luxury",
       "editorial",
@@ -136,11 +136,302 @@
       "historic",
       "urban"
     ],
-    "lightingNotes": "VERIFY: brick facade glows warm late in the day.",
-    "accessNotes": "VERIFY: private property. Ask management before any paid shoot.",
+    "lightingNotes": "brick facade glows warm late in the day.",
+    "accessNotes": "Private property. Ask management before any paid shoot.",
+    "photoUrl": "/locations/atl-005.jpg",
+    "lat": 33.7724,
+    "lng": -84.3656,
+    "verified": true
+  },
+  {
+    "id": "atl-006",
+    "name": "BeltLine Eastside Trail",
+    "neighborhood": "Old Fourth Ward",
+    "address": "pick one stretch, e.g. Eastside Trail near Irwin St NE, Atlanta, GA 30312",
+    "aesthetic": [
+      "casual",
+      "natural"
+    ],
+    "mood": [
+      "playful",
+      "soft"
+    ],
+    "colors": [
+      "pastel",
+      "warm"
+    ],
+    "environment": [
+      "greenery",
+      "urban"
+    ],
+    "lightingNotes": "tree-lined path with dappled light; check the open stretches at golden hour.",
+    "accessNotes": "Public trail with heavy foot and bike traffic. Check the BeltLine's rules for commercial photography.",
+    "photoUrl": "/locations/atl-006.jpg",
+    "lat": 33.77,
+    "lng": -84.365,
+    "verified": true
+  },
+  {
+    "id": "atl-007",
+    "name": "Atlanta Botanical Garden",
+    "neighborhood": "Midtown",
+    "address": "1345 Piedmont Ave NE, Atlanta, GA 30309",
+    "aesthetic": [
+      "natural",
+      "luxury",
+      "romantic"
+    ],
+    "mood": [
+      "serene",
+      "soft"
+    ],
+    "colors": [
+      "pastel",
+      "earthy"
+    ],
+    "environment": [
+      "greenery",
+      "water"
+    ],
+    "lightingNotes": "dappled shade most of the day; check golden hour on the open lawns.",
+    "accessNotes": "Paid admission and a commercial photography permit are likely required.",
+    "photoUrl": "/locations/atl-007.jpg",
+    "lat": 33.79,
+    "lng": -84.3733,
+    "verified": true
+  },
+  {
+    "id": "atl-008",
+    "name": "Castleberry Hill Arts District",
+    "neighborhood": "Castleberry Hill",
+    "address": "pick one block, e.g. Peters St SW near Walker St SW, Atlanta, GA 30313",
+    "aesthetic": [
+      "edgy",
+      "vintage",
+      "streetwear"
+    ],
+    "mood": [
+      "bold",
+      "cinematic"
+    ],
+    "colors": [
+      "warm",
+      "neutral"
+    ],
+    "environment": [
+      "industrial",
+      "historic",
+      "urban"
+    ],
+    "lightingNotes": "brick warehouses with narrow streets; check where the sun hits at your shoot time.",
+    "accessNotes": "Public streets. Watch for traffic; some walls are private.",
+    "photoUrl": "/locations/atl-008.jpg",
+    "lat": 33.7467,
+    "lng": -84.4012,
+    "verified": true
+  },
+  {
+    "id": "atl-009",
+    "name": "Politan Row at Colony Square (interior)",
+    "neighborhood": "Midtown",
+    "address": "1197 Peachtree St NE, Suite 150, Atlanta, GA 30361",
+    "aesthetic": [
+      "vintage",
+      "casual"
+    ],
+    "mood": [
+      "energetic",
+      "playful"
+    ],
+    "colors": [
+      "vibrant",
+      "warm"
+    ],
+    "environment": [
+      "indoor",
+      "architecture",
+      "urban"
+    ],
+    "lightingNotes": "Indoor food hall. Check available window light and interior lighting at your shoot time.",
+    "accessNotes": "Opens at 11am according to the venue. Contact management to arrange permission for a professional shoot.",
+    "photoUrl": "",
+    "lat": 33.7871256,
+    "lng": -84.3821143,
+    "verified": true
+  },
+  {
+    "id": "atl-010",
+    "name": "Hyatt Regency Atlanta Atrium",
+    "neighborhood": "Downtown",
+    "address": "265 Peachtree St NE, Atlanta, GA 30303",
+    "aesthetic": [
+      "luxury",
+      "vintage"
+    ],
+    "mood": [
+      "cinematic",
+      "bold"
+    ],
+    "colors": [
+      "warm",
+      "neutral"
+    ],
+    "environment": [
+      "indoor",
+      "architecture",
+      "urban"
+    ],
+    "lightingNotes": "tall atrium with soft overhead light and warm interior lighting.",
+    "accessNotes": "Private hotel lobby. Ask the hotel before any paid shoot.",
+    "photoUrl": "/locations/atl-010.jpg",
+    "lat": 33.7618,
+    "lng": -84.3874,
+    "verified": true
+  },
+  {
+    "id": "atl-011",
+    "name": "Atlanta-Fulton Central Library",
+    "neighborhood": "Downtown",
+    "address": "1 Margaret Mitchell Sq NW, Atlanta, GA 30303",
+    "aesthetic": [
+      "edgy",
+      "casual"
+    ],
+    "mood": [
+      "bold",
+      "soft"
+    ],
+    "colors": [
+      "neutral",
+      "earthy"
+    ],
+    "environment": [
+      "indoor",
+      "architecture",
+      "urban"
+    ],
+    "lightingNotes": "concrete interior with strong geometric shadows from the windows.",
+    "accessNotes": "Public building. Ask the library about photography policy and permits.",
+    "photoUrl": "/locations/atl-011.jpg",
+    "lat": 33.7608,
+    "lng": -84.3881,
+    "verified": true
+  },
+  {
+    "id": "atl-012",
+    "name": "Fox Theatre (lobby and interior)",
+    "neighborhood": "Midtown",
+    "address": "660 Peachtree St NE, Atlanta, GA 30308",
+    "aesthetic": [
+      "luxury",
+      "vintage",
+      "romantic"
+    ],
+    "mood": [
+      "cinematic",
+      "dreamy"
+    ],
+    "colors": [
+      "warm",
+      "vibrant"
+    ],
+    "environment": [
+      "indoor",
+      "historic",
+      "architecture"
+    ],
+    "lightingNotes": "dim, ornate interior; plan for low-light settings.",
+    "accessNotes": "Private venue. Access is by tour or booking, so ask about photo permission.",
+    "photoUrl": "/locations/atl-012.jpg",
+    "lat": 33.7728,
+    "lng": -84.3856,
+    "verified": true
+  },
+  {
+    "id": "atl-013",
+    "name": "Ponce City Market (Rooftop)",
+    "neighborhood": "Old Fourth Ward",
+    "address": "675 Ponce de Leon Ave NE, Atlanta, GA 30308",
+    "aesthetic": [
+      "casual",
+      "luxury"
+    ],
+    "mood": [
+      "energetic",
+      "playful"
+    ],
+    "colors": [
+      "warm",
+      "neutral"
+    ],
+    "environment": [
+      "rooftop",
+      "skyline",
+      "urban"
+    ],
+    "lightingNotes": "Open-air rooftop with skyline views. Plan around daylight and weather; scout the light at your shoot time.",
+    "accessNotes": "Ticketed rooftop. Professional photoshoots, promotional content, and cameras with extra gear require advance approval from The Roof Events team; call 770-999-1530.",
     "photoUrl": "",
     "lat": 33.7724,
     "lng": -84.3656,
-    "verified": false
+    "verified": true
+  },
+  {
+    "id": "atl-014",
+    "name": "Westside Provisions District",
+    "neighborhood": "West Midtown",
+    "address": "1198 Howell Mill Rd NW, Atlanta, GA 30318",
+    "aesthetic": [
+      "luxury",
+      "casual"
+    ],
+    "mood": [
+      "soft",
+      "cinematic"
+    ],
+    "colors": [
+      "warm",
+      "neutral"
+    ],
+    "environment": [
+      "urban",
+      "industrial",
+      "architecture"
+    ],
+    "lightingNotes": "converted-industrial streets with string lights; good at dusk.",
+    "accessNotes": "Private development. Ask management before any paid shoot.",
+    "photoUrl": "",
+    "lat": 33.7915,
+    "lng": -84.4116,
+    "verified": true
+  },
+  {
+    "id": "atl-015",
+    "name": "Sweet Auburn Murals",
+    "neighborhood": "Sweet Auburn",
+    "address": "pick one mural wall, e.g. along Auburn Ave NE, Atlanta, GA 30303",
+    "aesthetic": [
+      "streetwear",
+      "edgy"
+    ],
+    "mood": [
+      "bold",
+      "energetic"
+    ],
+    "colors": [
+      "vibrant",
+      "warm"
+    ],
+    "environment": [
+      "street-art",
+      "urban",
+      "historic"
+    ],
+    "lightingNotes": "depends on wall orientation; check the time of day for each mural.",
+    "accessNotes": "Public sidewalks, but some murals are on private walls. Respect the artists.",
+    "photoUrl": "/locations/atl-015.jpg",
+    "lat": 33.7544,
+    "lng": -84.3774,
+    "verified": true
   }
 ]
