@@ -14,7 +14,7 @@ share         ─► /p.html#…           ─► client opens the proposal from
 
 Nothing is stored. Uploaded photos live in memory for a single request.
 
-If Gemini is slow or down, the app still works: calls time out (25s analysis, 20s shot list), hiccups get one retry, and the photographer picks style tags by hand or gets a basic shot list. Photos are shrunk in the browser to 1600px before upload.
+If Gemini is slow or down, the app still works: calls time out (25s analysis, 30s shot list), hiccups get one retry, and the photographer picks style tags by hand or gets a basic shot list. Photos are shrunk in the browser to 1600px before upload.
 
 ## Run it locally
 
